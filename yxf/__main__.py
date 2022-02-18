@@ -2,6 +2,7 @@ import argparse
 import logging
 import pathlib
 import openpyxl
+import openpyxl.styles
 import strictyaml
 
 log = logging.getLogger("yxf.__main__")
@@ -20,7 +21,6 @@ def _convert_sheet(sheet):
     for row in sheet.values:
         if headers is None:
             headers = _truncate_row(row)
-            log.debug("headers: %s", headers)
             continue
 
         values = _truncate_row(row)
@@ -36,12 +36,50 @@ def _convert_sheet(sheet):
     return result
 
 
+def _convert_to_sheet(sheet, rows):
+    keys = []
+    keys_set = set()
+    for row in rows:
+        for key in row:
+            if key not in keys_set:
+                keys.append(key)
+                keys_set.add(key)
+
+    for i, key in enumerate(keys):
+        sheet.cell(row=1, column=i + 1, value=key)
+
+    next_row = 2
+    for row in rows:
+        if row.get("type") == "begin_group":
+            next_row += 1
+
+        for i, key in enumerate(keys):
+            if key in row:
+                sheet.cell(row=next_row, column=i + 1, value=row[key])
+
+        next_row += 1
+
+    return sheet
+
+
+def _make_pretty_spreadsheet(wb):
+    header_style = openpyxl.styles.NamedStyle(name="header")
+    header_style.font = openpyxl.styles.Font(bold=True)
+    for sheet in wb:
+        for cell in sheet[1]:
+            cell.style = header_style
+        sheet.freeze_panes = sheet["A2"]
+
+        # TODO(Jonas): set column widths and overflow
+        # TODO(Jonas): format type and name column with a fixed-width font
+        # TODO(Jonas): add support for comments
+
+
 def xlsform_to_yaml(filename: pathlib.Path):
     target_filename = filename.with_suffix(".yaml")
     log.info("xlsform_to_yaml: %s -> %s", filename, target_filename)
 
     wb = openpyxl.load_workbook(filename, read_only=True)
-    log.debug("Workbook: %s", wb)
     result = {}
     for sheet_name in ["survey", "choices", "settings"]:
         if sheet_name in wb:
@@ -52,7 +90,18 @@ def xlsform_to_yaml(filename: pathlib.Path):
 
 
 def yaml_to_xlsform(filename: pathlib.Path):
-    log.info("yaml_to_xlsform: %s", filename)
+    target_filename = filename.with_suffix(".xlsx")
+    log.info("yaml_to_xlsform: %s -> %s", filename, target_filename)
+
+    with open(filename) as f:
+        form = strictyaml.load(f.read()).data
+
+    wb = openpyxl.Workbook()
+    for sheet_name in form:
+        _convert_to_sheet(wb.create_sheet(sheet_name), form[sheet_name])
+    wb.remove(wb.active)
+    _make_pretty_spreadsheet(wb)
+    wb.save(target_filename)
 
 
 def main():
