@@ -1,10 +1,11 @@
 import argparse
+import collections
 import grapefruit
 import logging
-import pathlib
 import openpyxl
 import openpyxl.styles
 import openpyxl.utils
+import pathlib
 import strictyaml
 
 GROUP_COLOR = grapefruit.Color.NewFromHtml("#c7ffdb")
@@ -28,7 +29,7 @@ def _convert_sheet(sheet):
             continue
 
         values = _truncate_row(row)
-        row_dict = {}
+        row_dict = collections.OrderedDict()
         for h, v in zip(headers, values):
             if v is None:
                 continue
@@ -76,6 +77,12 @@ def _make_pretty_spreadsheet(wb):
     name_style = openpyxl.styles.NamedStyle(name="name")
     name_style.font = openpyxl.styles.Font(name="Courier New", color="ffa13b16")
 
+    comment_style = openpyxl.styles.NamedStyle(name="comment")
+    comment_style.font = openpyxl.styles.Font(name="Courier New", color="ff009c5d")
+
+    note_style = openpyxl.styles.NamedStyle(name="note")
+    note_style.font = openpyxl.styles.Font(color="ff555555")
+
     for sheet in wb:
         for cell in sheet[1]:
             cell.style = header_style
@@ -83,7 +90,12 @@ def _make_pretty_spreadsheet(wb):
 
         # Set column widths to reasonable values
         widths = [[] for _ in sheet[1]]
+        headers = None
         for row in sheet:
+            if headers is None:
+                headers = [c.value for c in row]
+                comment_column = headers.index("#") if "#" in headers else -1
+                continue
             for i, cell in enumerate(row):
                 if cell.value:
                     width = max(len(w) for w in cell.value.splitlines())
@@ -94,6 +106,8 @@ def _make_pretty_spreadsheet(wb):
             num_rows = len(col_widths)
             percentile_index = num_rows * 3 // 4
             estimated_width = col_widths[percentile_index] + 10
+            if i == comment_column:
+                estimated_width = 2
             if estimated_width <= 60:
                 sheet.column_dimensions[
                     openpyxl.utils.get_column_letter(i + 1)
@@ -107,7 +121,7 @@ def _make_pretty_spreadsheet(wb):
                         row=row_index + 1, column=i + 1
                     ).alignment = openpyxl.styles.Alignment(wrap_text=True)
 
-        # Apply specific styles to known special columns
+        # Apply specific styles to known special columns or rows
         headers = None
         code_columns = set(
             ["calculation", "relevant", "constraint", "repeat_count", "instance_name"]
@@ -115,12 +129,17 @@ def _make_pretty_spreadsheet(wb):
         for row in sheet:
             if headers is None:
                 headers = [c.value for c in row]
+                type_column = headers.index("type") if "type" in headers else -1
                 continue
             for i, cell in enumerate(row):
                 if headers[i] in code_columns:
                     cell.style = code_style
                 elif headers[i] == "name":
                     cell.style = name_style
+                elif headers[i] == "#":
+                    cell.style = comment_style
+                elif type_column >= 0 and row[type_column].value == "note":
+                    cell.style = note_style
 
         # Highlight groups and nesting
         group_number = 0
@@ -151,8 +170,6 @@ def _make_pretty_spreadsheet(wb):
             if str(row[type_column].value).startswith("end_"):
                 color_stack.pop()
 
-        # TODO(Jonas): add support for comments
-
 
 def _check_existing_output(filename, force):
     if filename.exists() and not force:
@@ -165,10 +182,25 @@ def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
     log.info("xlsform_to_yaml: %s -> %s", filename, target)
 
     wb = openpyxl.load_workbook(filename, read_only=True)
-    result = {}
+    result = collections.OrderedDict()
     for sheet_name in ["survey", "choices", "settings"]:
         if sheet_name in wb:
             result[sheet_name] = _convert_sheet(wb[sheet_name])
+
+    first_line = result["survey"][0]
+    if not "#" in first_line or not first_line["#"].startswith("Converted by yxf,"):
+        first_line = {
+            "#": "Converted by yxf, from {}. Edit the YAML file instead of the Excel file.".format(
+                filename.name
+            )
+        }
+        result["survey"].insert(0, first_line)
+    elif first_line.get("#").startswith("Converted by yxf,"):
+        first_line[
+            "#"
+        ] = "Converted by yxf, from {}. Edit the YAML file instead of the Excel file.".format(
+            filename.name
+        )
 
     with open(target, "w") as f:
         f.write(strictyaml.as_document(result).as_yaml())
