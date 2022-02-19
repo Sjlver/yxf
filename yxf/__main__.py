@@ -75,6 +75,13 @@ def _make_pretty_spreadsheet(wb):
         # TODO(Jonas): add support for comments
 
 
+def _check_existing_output(filename, force):
+    if filename.exists() and not force:
+        raise ValueError(
+            "File already exists (use --force to override): {}".format(filename)
+        )
+
+
 def xlsform_to_yaml(filename: pathlib.Path):
     target_filename = filename.with_suffix(".yaml")
     log.info("xlsform_to_yaml: %s -> %s", filename, target_filename)
@@ -110,19 +117,31 @@ def main():
     parser = argparse.ArgumentParser(
         description="Convert from XLSForm to YAML and back"
     )
+    parser.add_argument("file", type=pathlib.Path, help="a file to be converted")
     parser.add_argument(
-        "files", metavar="file", nargs="+", type=str, help="a file to be converted"
+        "-o",
+        "--output",
+        type=pathlib.Path,
+        help="output file name (default: same as input, with extension changed)",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="allow overwriting existing output files",
     )
     args = parser.parse_args()
 
-    for filename in args.files:
-        filename = pathlib.Path(filename)
-        if filename.suffix == ".xlsx":
-            xlsform_to_yaml(filename)
-        elif filename.suffix == ".yaml":
-            yaml_to_xlsform(filename)
-        else:
-            raise ValueError("Unrecognized file extension: {}".format(filename))
+    if args.file.suffix == ".xlsx":
+        args.output = args.output or args.file.with_suffix(".yaml")
+        _check_existing_output(args.output, args.force)
+        xlsform_to_yaml(args.file)
+    elif args.file.suffix == ".yaml":
+        args.output = args.output or args.file.with_suffix(".xlsx")
+        _check_existing_output(args.output, args.force)
+        yaml_to_xlsform(args.file)
+    else:
+        raise ValueError("Unrecognized file extension: {}".format(args.file))
 
 
 if __name__ == "__main__":
