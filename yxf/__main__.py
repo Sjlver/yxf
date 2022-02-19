@@ -1,9 +1,13 @@
 import argparse
+import grapefruit
 import logging
 import pathlib
 import openpyxl
 import openpyxl.styles
+import openpyxl.utils
 import strictyaml
+
+GROUP_COLOR = grapefruit.Color.NewFromHtml("#c7ffdb")
 
 log = logging.getLogger("yxf.__main__")
 
@@ -65,13 +69,88 @@ def _convert_to_sheet(sheet, rows):
 def _make_pretty_spreadsheet(wb):
     header_style = openpyxl.styles.NamedStyle(name="header")
     header_style.font = openpyxl.styles.Font(bold=True)
+
+    code_style = openpyxl.styles.NamedStyle(name="code")
+    code_style.font = openpyxl.styles.Font(name="Courier New", color="ff19007d")
+
+    name_style = openpyxl.styles.NamedStyle(name="name")
+    name_style.font = openpyxl.styles.Font(name="Courier New", color="ffa13b16")
+
     for sheet in wb:
         for cell in sheet[1]:
             cell.style = header_style
         sheet.freeze_panes = sheet["A2"]
 
-        # TODO(Jonas): set column widths and overflow
-        # TODO(Jonas): format type and name column with a fixed-width font
+        # Set column widths to reasonable values
+        widths = [[] for _ in sheet[1]]
+        for row in sheet:
+            for i, cell in enumerate(row):
+                if cell.value:
+                    width = max(len(w) for w in cell.value.splitlines())
+                    widths[i].append(width)
+        # We take the 75th percentile width plus 10
+        for i in range(len(widths)):
+            col_widths = sorted(widths[i])
+            num_rows = len(col_widths)
+            percentile_index = num_rows * 3 // 4
+            estimated_width = col_widths[percentile_index] + 10
+            if estimated_width <= 60:
+                sheet.column_dimensions[
+                    openpyxl.utils.get_column_letter(i + 1)
+                ].width = estimated_width
+            else:
+                sheet.column_dimensions[
+                    openpyxl.utils.get_column_letter(i + 1)
+                ].width = 60
+                for row_index, _ in enumerate(sheet):
+                    sheet.cell(
+                        row=row_index + 1, column=i + 1
+                    ).alignment = openpyxl.styles.Alignment(wrap_text=True)
+
+        # Apply specific styles to known special columns
+        headers = None
+        code_columns = set(
+            ["calculation", "relevant", "constraint", "repeat_count", "instance_name"]
+        )
+        for row in sheet:
+            if headers is None:
+                headers = [c.value for c in row]
+                continue
+            for i, cell in enumerate(row):
+                if headers[i] in code_columns:
+                    cell.style = code_style
+                elif headers[i] == "name":
+                    cell.style = name_style
+
+        # Highlight groups and nesting
+        group_number = 0
+        color_stack = []
+        headers = None
+        for row in sheet:
+            if headers is None:
+                headers = [c.value for c in row]
+                if "type" not in headers:
+                    break
+                type_column = headers.index("type")
+                continue
+            if str(row[type_column].value).startswith("begin_"):
+                if not color_stack:
+                    h, s, v = GROUP_COLOR.hsv
+                    h += 20 * group_number
+                    group_number += 1
+                    color_stack.append(grapefruit.Color.NewFromHsv(h, s, v))
+                else:
+                    color_stack.append(color_stack[-1].DarkerColor(0.05))
+
+            if color_stack:
+                for cell in row[:1]:
+                    cell.fill = openpyxl.styles.PatternFill(
+                        fgColor="ff" + color_stack[-1].html[1:], fill_type="solid"
+                    )
+
+            if str(row[type_column].value).startswith("end_"):
+                color_stack.pop()
+
         # TODO(Jonas): add support for comments
 
 
@@ -82,9 +161,8 @@ def _check_existing_output(filename, force):
         )
 
 
-def xlsform_to_yaml(filename: pathlib.Path):
-    target_filename = filename.with_suffix(".yaml")
-    log.info("xlsform_to_yaml: %s -> %s", filename, target_filename)
+def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
+    log.info("xlsform_to_yaml: %s -> %s", filename, target)
 
     wb = openpyxl.load_workbook(filename, read_only=True)
     result = {}
@@ -92,13 +170,12 @@ def xlsform_to_yaml(filename: pathlib.Path):
         if sheet_name in wb:
             result[sheet_name] = _convert_sheet(wb[sheet_name])
 
-    with open(target_filename, "w") as f:
+    with open(target, "w") as f:
         f.write(strictyaml.as_document(result).as_yaml())
 
 
-def yaml_to_xlsform(filename: pathlib.Path):
-    target_filename = filename.with_suffix(".xlsx")
-    log.info("yaml_to_xlsform: %s -> %s", filename, target_filename)
+def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
+    log.info("yaml_to_xlsform: %s -> %s", filename, target)
 
     with open(filename) as f:
         form = strictyaml.load(f.read()).data
@@ -108,7 +185,7 @@ def yaml_to_xlsform(filename: pathlib.Path):
         _convert_to_sheet(wb.create_sheet(sheet_name), form[sheet_name])
     wb.remove(wb.active)
     _make_pretty_spreadsheet(wb)
-    wb.save(target_filename)
+    wb.save(target)
 
 
 def main():
@@ -135,11 +212,11 @@ def main():
     if args.file.suffix == ".xlsx":
         args.output = args.output or args.file.with_suffix(".yaml")
         _check_existing_output(args.output, args.force)
-        xlsform_to_yaml(args.file)
+        xlsform_to_yaml(args.file, args.output)
     elif args.file.suffix == ".yaml":
         args.output = args.output or args.file.with_suffix(".xlsx")
         _check_existing_output(args.output, args.force)
-        yaml_to_xlsform(args.file)
+        yaml_to_xlsform(args.file, args.output)
     else:
         raise ValueError("Unrecognized file extension: {}".format(args.file))
 
