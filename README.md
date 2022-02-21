@@ -18,7 +18,7 @@ To convert a YAML file to an XLSForm: `python -m yxf form.yaml`.
 
 Here's a screenshot showing the YAML and XLSForm version of a form side-by-side:
 
-![YAML and XLSForm version of a form](docs/yxf-yaml-and-xlsx-side-by-side.png)
+![YAML and XLSForm version of a form](https://github.com/Sjlver/yxf/blob/main/docs/yxf-yaml-and-xlsx-side-by-side.png)
 
 ## Installation
 
