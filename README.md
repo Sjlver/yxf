@@ -28,11 +28,24 @@ Get the latest version from the GitHub repo:
 python -m pip install 'git+https://github.com/Sjlver/yxf.git'
 ```
 
-## Comments in forms
+## Features
+
+### Comments in forms
 
 yxf encourages adding comments to XLSForms. It uses a special column labeled `#`
 to that end. Other tools ignore this column, so that it can be used for
 explanations that are useful to the readers of the `.xlsx` or `.yaml` files.
+
+### Pretty spreadsheets
+
+yxf tries hard to make the XLSForm files look pretty. It is possible to use yxf
+just for that purpose, without intending to store forms as YAML files. To do so,
+simply convert a form to YAML and back:
+
+```
+python -m yxf form.xlsx
+python -m yxf -o form-pretty.xlsx form.yaml
+```
 
 ## Development
 

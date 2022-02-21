@@ -15,33 +15,21 @@ import collections
 import logging
 import pathlib
 
-import grapefruit
 import openpyxl
 import openpyxl.styles
 import openpyxl.utils
 import strictyaml
 
-GROUP_COLOR = grapefruit.Color.NewFromHtml("#c7ffdb")
+from . import xlsform
 
 log = logging.getLogger("yxf.__main__")
 
 
-def _truncate_row(row):
-    row = list(row)
-    while row and row[-1] is None:
-        row.pop()
-    return row
-
-
 def _convert_sheet(sheet):
-    headers = None
+    headers = xlsform.headers(sheet)
     result = []
-    for row in sheet.values:
-        if headers is None:
-            headers = _truncate_row(row)
-            continue
-
-        values = _truncate_row(row)
+    for row in xlsform.content_rows(sheet, values_only=True):
+        values = xlsform.truncate_row(row)
         row_dict = collections.OrderedDict()
         for h, v in zip(headers, values):
             if v is None:
@@ -78,110 +66,6 @@ def _convert_to_sheet(sheet, rows):
         next_row += 1
 
     return sheet
-
-
-def _make_pretty_spreadsheet(wb):
-    header_style = openpyxl.styles.NamedStyle(name="header")
-    header_style.font = openpyxl.styles.Font(bold=True)
-
-    code_style = openpyxl.styles.NamedStyle(name="code")
-    code_style.font = openpyxl.styles.Font(name="Courier New", color="ff19007d")
-
-    name_style = openpyxl.styles.NamedStyle(name="name")
-    name_style.font = openpyxl.styles.Font(name="Courier New", color="ffa13b16")
-
-    comment_style = openpyxl.styles.NamedStyle(name="comment")
-    comment_style.font = openpyxl.styles.Font(name="Courier New", color="ff009c5d")
-
-    note_style = openpyxl.styles.NamedStyle(name="note")
-    note_style.font = openpyxl.styles.Font(color="ff555555")
-
-    for sheet in wb:
-        for cell in sheet[1]:
-            cell.style = header_style
-        sheet.freeze_panes = sheet["A2"]
-
-        # Set column widths to reasonable values
-        widths = [[] for _ in sheet[1]]
-        headers = None
-        for row in sheet:
-            if headers is None:
-                headers = [c.value for c in row]
-                comment_column = headers.index("#") if "#" in headers else -1
-                continue
-            for i, cell in enumerate(row):
-                if cell.value:
-                    width = max(len(w) for w in cell.value.splitlines())
-                    widths[i].append(width)
-        # We take the 75th percentile width plus 10
-        for i, ws in enumerate(widths):
-            col_widths = sorted(ws)
-            num_rows = len(col_widths)
-            percentile_index = num_rows * 3 // 4
-            estimated_width = col_widths[percentile_index] + 10
-            if i == comment_column:
-                estimated_width = 2
-            if estimated_width <= 60:
-                sheet.column_dimensions[
-                    openpyxl.utils.get_column_letter(i + 1)
-                ].width = estimated_width
-            else:
-                sheet.column_dimensions[
-                    openpyxl.utils.get_column_letter(i + 1)
-                ].width = 60
-                for row_index, _ in enumerate(sheet):
-                    sheet.cell(
-                        row=row_index + 1, column=i + 1
-                    ).alignment = openpyxl.styles.Alignment(wrap_text=True)
-
-        # Apply specific styles to known special columns or rows
-        headers = None
-        code_columns = set(
-            ["calculation", "relevant", "constraint", "repeat_count", "instance_name"]
-        )
-        for row in sheet:
-            if headers is None:
-                headers = [c.value for c in row]
-                type_column = headers.index("type") if "type" in headers else -1
-                continue
-            for i, cell in enumerate(row):
-                if headers[i] in code_columns:
-                    cell.style = code_style
-                elif headers[i] == "name":
-                    cell.style = name_style
-                elif headers[i] == "#":
-                    cell.style = comment_style
-                elif type_column >= 0 and row[type_column].value == "note":
-                    cell.style = note_style
-
-        # Highlight groups and nesting
-        group_number = 0
-        color_stack = []
-        headers = None
-        for row in sheet:
-            if headers is None:
-                headers = [c.value for c in row]
-                if "type" not in headers:
-                    break
-                type_column = headers.index("type")
-                continue
-            if str(row[type_column].value).startswith("begin_"):
-                if not color_stack:
-                    h, s, v = GROUP_COLOR.hsv
-                    h += 20 * group_number
-                    group_number += 1
-                    color_stack.append(grapefruit.Color.NewFromHsv(h, s, v))
-                else:
-                    color_stack.append(color_stack[-1].DarkerColor(0.05))
-
-            if color_stack:
-                for cell in row[:1]:
-                    cell.fill = openpyxl.styles.PatternFill(
-                        fgColor="ff" + color_stack[-1].html[1:], fill_type="solid"
-                    )
-
-            if str(row[type_column].value).startswith("end_"):
-                color_stack.pop()
 
 
 def _check_existing_output(filename, force):
@@ -227,7 +111,7 @@ def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
     for sheet_name in form:
         _convert_to_sheet(wb.create_sheet(sheet_name), form[sheet_name])
     wb.remove(wb.active)
-    _make_pretty_spreadsheet(wb)
+    xlsform.make_pretty(wb)
     wb.save(target)
 
 
