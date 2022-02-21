@@ -42,15 +42,7 @@ def _convert_sheet(sheet):
     return result
 
 
-def _convert_to_sheet(sheet, rows):
-    keys = []
-    keys_set = set()
-    for row in rows:
-        for key in row:
-            if key not in keys_set:
-                keys.append(key)
-                keys_set.add(key)
-
+def _convert_to_sheet(sheet, rows, keys):
     for i, key in enumerate(keys):
         sheet.cell(row=1, column=i + 1, value=key)
 
@@ -73,6 +65,17 @@ def _check_existing_output(filename, force):
         raise ValueError(f"File already exists (use --force to override): {filename}")
 
 
+def _ensure_yxf_comment(form, name):
+    desired_comment = (
+        f"Converted by yxf, from {name}. Edit the YAML file instead of the Excel file."
+    )
+    first_line = form["survey"][0]
+    if "#" not in first_line or not first_line["#"].startswith("Converted by yxf,"):
+        form["survey"].insert(0, {"#": desired_comment})
+    else:
+        form["survey"][0]["#"] = desired_comment
+
+
 def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
     """Convert XLSForm file `filename` to YAML file `target`."""
 
@@ -80,20 +83,23 @@ def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
 
     wb = openpyxl.load_workbook(filename, read_only=True)
     result = collections.OrderedDict()
+    headers = collections.OrderedDict()
     for sheet_name in ["survey", "choices", "settings"]:
         if sheet_name in wb:
             result[sheet_name] = _convert_sheet(wb[sheet_name])
+            headers[sheet_name] = xlsform.headers(wb[sheet_name])
+            if headers[sheet_name] and headers[sheet_name][0] != "#":
+                if "#" in headers[sheet_name]:
+                    raise ValueError(
+                        f"The comment column must come first in sheet {sheet_name}."
+                    )
+                headers[sheet_name].insert(0, "#")
 
-    first_line = result["survey"][0]
-    if not "#" in first_line or not first_line["#"].startswith("Converted by yxf,"):
-        first_line = {
-            "#": f"Converted by yxf, from {filename.name}. Edit the YAML file instead of the Excel file."
-        }
-        result["survey"].insert(0, first_line)
-    elif first_line.get("#").startswith("Converted by yxf,"):
-        first_line[
-            "#"
-        ] = f"Converted by yxf, from {filename.name}. Edit the YAML file instead of the Excel file."
+    if "survey" not in result:
+        raise ValueError('An XLSForm must have a "survey" sheet.')
+
+    _ensure_yxf_comment(result, filename.name)
+    result["yxf"] = {"headers": headers}
 
     with open(target, "w", encoding="utf-8") as f:
         f.write(strictyaml.as_document(result).as_yaml())
@@ -107,9 +113,21 @@ def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
     with open(filename, encoding="utf-8") as f:
         form = strictyaml.load(f.read()).data
 
+    if "yxf" not in form:
+        raise ValueError('YAML file must have a "yxf" entry.')
+    if "survey" not in form:
+        raise ValueError('YAML file must have a "survey" entry.')
+    _ensure_yxf_comment(form, filename.name)
+
     wb = openpyxl.Workbook()
     for sheet_name in form:
-        _convert_to_sheet(wb.create_sheet(sheet_name), form[sheet_name])
+        if sheet_name == "yxf":
+            continue
+        _convert_to_sheet(
+            wb.create_sheet(sheet_name),
+            form[sheet_name],
+            form["yxf"]["headers"][sheet_name],
+        )
     wb.remove(wb.active)
     xlsform.make_pretty(wb)
     wb.save(target)

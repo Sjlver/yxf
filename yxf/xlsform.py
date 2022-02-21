@@ -64,7 +64,7 @@ def make_pretty(wb: openpyxl.Workbook):
         type_column = sheet_headers.index("type") if "type" in sheet_headers else -1
 
         # Set column widths to reasonable values. First, get all widths.
-        widths = [[] for _ in sheet[1]]
+        widths = [[] for _ in headers(sheet)]
         for row in content_rows(sheet):
             for i, cell in enumerate(row):
                 if cell.value:
@@ -73,6 +73,8 @@ def make_pretty(wb: openpyxl.Workbook):
 
         # We take the 75th percentile width plus 10.
         for i, ws in enumerate(widths):
+            if not ws:
+                continue
             col_widths = sorted(ws)
             num_rows = len(col_widths)
             percentile_index = num_rows * 3 // 4
