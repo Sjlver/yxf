@@ -25,7 +25,7 @@ Here's a screenshot showing the YAML and XLSForm version of a form side-by-side:
 Get the latest version from the GitHub repo:
 
 ```
-python -m pip install 'git+https://github.com/Sjlver/yxf.git'
+python -m pip install yxf
 ```
 
 ## Features
