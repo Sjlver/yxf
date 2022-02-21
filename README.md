@@ -19,6 +19,14 @@ Here's a screenshot showing the YAML and XLSForm version of a form side-by-side:
 
 ![YAML and XLSForm version of a form](docs/yxf-yaml-and-xlsx-side-by-side.png)
 
+## Installation
+
+Get the latest version from the GitHub repo:
+
+```
+python -m pip install 'git+https://github.com/Sjlver/yxf.git'
+```
+
 ## Comments in forms
 
 yxf encourages adding comments to XLSForms. It uses a special column labeled `#`
