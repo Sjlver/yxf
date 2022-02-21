@@ -43,6 +43,8 @@ def _convert_sheet(sheet):
 
 
 def _convert_to_sheet(sheet, rows, keys):
+    key_set = set(keys)
+
     for i, key in enumerate(keys):
         sheet.cell(row=1, column=i + 1, value=key)
 
@@ -50,6 +52,12 @@ def _convert_to_sheet(sheet, rows, keys):
     for row in rows:
         if row.get("type") == "begin_group":
             next_row += 1
+
+        if not all(k in key_set for k in row.keys()):
+            missing_key = next(k for k in row.keys() if k not in key_set)
+            raise ValueError(
+                f'Invalid key "{missing_key}" in row "{row.get("name", "(unnamed)")}". Add it to yxf.headers.{sheet.title} in the YAML file.'
+            )
 
         for i, key in enumerate(keys):
             if key in row:

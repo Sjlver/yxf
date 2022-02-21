@@ -73,14 +73,16 @@ def make_pretty(wb: openpyxl.Workbook):
 
         # We take the 75th percentile width plus 10.
         for i, ws in enumerate(widths):
-            if not ws:
-                continue
             col_widths = sorted(ws)
             num_rows = len(col_widths)
             percentile_index = num_rows * 3 // 4
-            estimated_width = col_widths[percentile_index] + 10
             if i == comment_column:
                 estimated_width = 2
+            elif col_widths:
+                estimated_width = col_widths[percentile_index] + 10
+            else:
+                estimated_width = 10
+
             if estimated_width <= 60:
                 sheet.column_dimensions[
                     openpyxl.utils.get_column_letter(i + 1)
