@@ -28,18 +28,23 @@ from . import xlsform
 log = logging.getLogger("yxf.__main__")
 
 
+def _row_to_dict(headers, values):
+    row_dict = collections.OrderedDict()
+    for h, v in zip(headers, values):
+        if v is None:
+            continue
+        if h is None:
+            raise ValueError(f"Cell with no column header: {v}")
+        row_dict[h] = v
+    return row_dict
+
+
 def _convert_sheet(sheet):
     headers = xlsform.headers(sheet)
     result = []
     for row in xlsform.content_rows(sheet, values_only=True):
         values = xlsform.truncate_row(row)
-        row_dict = collections.OrderedDict()
-        for h, v in zip(headers, values):
-            if v is None:
-                continue
-            if h is None:
-                raise ValueError(f"Cell with no column header: {v}")
-            row_dict[h] = v
+        row_dict = _row_to_dict(headers, values)
         if row_dict:
             result.append(row_dict)
     return result
@@ -196,13 +201,7 @@ def markdown_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
             rows = [[c.children[0].content for c in row.children] for row in rows]
             result = []
             for values in rows:
-                row_dict = collections.OrderedDict()
-                for h, v in zip(headers, values):
-                    if v is None:
-                        continue
-                    if h is None:
-                        raise ValueError(f"Cell with no column header: {v}")
-                    row_dict[h] = v
+                row_dict = _row_to_dict(headers, values)
                 if row_dict:
                     result.append(row_dict)
             form[sheet_name] = result
