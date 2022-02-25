@@ -117,11 +117,7 @@ def _validate_sheet_name(sheet_name, filename, line):
         )
 
 
-def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
-    """Convert XLSForm file `filename` to YAML file `target`."""
-
-    log.info("xlsform_to_yaml: %s -> %s", filename, target)
-
+def _load_workbook(filename):
     wb = openpyxl.load_workbook(filename, read_only=True)
     result = collections.OrderedDict()
     headers = collections.OrderedDict()
@@ -139,16 +135,73 @@ def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
         raise ValueError('An XLSForm must have a "survey" sheet.')
 
     result["yxf"] = {"headers": headers}
-    _ensure_yxf_comment(result, filename.name, "YAML")
+    return result
 
+
+def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
+    """Convert XLSForm file `filename` to YAML file `target`."""
+
+    log.info("xlsform_to_yaml: %s -> %s", filename, target)
+
+    form = _load_workbook(filename)
+    _ensure_yxf_comment(form, filename.name, "YAML")
     with open(target, "w", encoding="utf-8") as f:
-        f.write(strictyaml.as_document(result).as_yaml())
+        f.write(strictyaml.as_document(form).as_yaml())
 
 
 def xlsform_to_markdown(filename: pathlib.Path, target: pathlib.Path):
     """Convert XLSForm file `filename` to Markdown file `target`."""
 
     log.info("xlsform_to_markdown: %s -> %s", filename, target)
+    form = _load_workbook(filename)
+    _ensure_yxf_comment(form, filename.name, "Markdown")
+
+    md = []
+    for sheet_name in ["survey", "choices", "settings"]:
+        if sheet_name not in form:
+            continue
+
+        md.append(f"## {sheet_name}")
+        md.append("")
+
+        sheet = form[sheet_name]
+        headers = form["yxf"]["headers"][sheet_name]
+        header_indices = dict(zip(headers, range(len(headers))))
+
+        # Before we render the table, look for comments and render those.
+        # We simply put them as paragraphs in the Markdown file.
+        for row in sheet:
+            if "#" in row:
+                md.append(row["#"])
+                md.append("")
+                del row["#"]
+
+        if headers[0] == "#":
+            headers.pop(0)
+            del header_indices["#"]
+            header_indices = {k: v - 1 for (k, v) in header_indices.items()}
+
+        # Find column widths
+        widths = [len(h) for h in headers]
+        for row in sheet:
+            for k, v in row.items():
+                i = header_indices[k]
+                widths[i] = max(widths[i], len(v))
+
+        # Render the table
+        header_row = [h.ljust(w) for (h, w) in zip(headers, widths)]
+        md.append(f"| {' | '.join(header_row)} |")
+        separator_row = ["-" * w for w in widths]
+        md.append(f"| {' | '.join(separator_row)} |")
+        for row in sheet:
+            if not row:
+                continue
+            formatted_row = [row.get(h, "").ljust(w) for (h, w) in zip(headers, widths)]
+            md.append(f"| {' | '.join(formatted_row)} |")
+        md.append("")
+
+    with open(target, "w", encoding="utf-8") as f:
+        f.write("\n".join(md))
 
 
 def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
@@ -184,12 +237,17 @@ def markdown_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
         if node.tag == "h2":
             sheet_name = node.children[0].content
             _validate_sheet_name(sheet_name, filename.name, node.map[0])
+            result = []
         elif node.tag == "p":
             content = node.children[0].content
             match = re.match(r"%%\s*(.*)", content)
             if match:
                 sheet_name = match.group(1)
                 _validate_sheet_name(sheet_name, filename.name, node.map[0])
+            else:
+                # Other paragraphs are treated as comments and added to the
+                # beginning of the current sheet.
+                result.append({"#": content})
         elif node.tag == "table":
             if not sheet_name:
                 raise ValueError(
@@ -197,10 +255,14 @@ def markdown_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
                 )
             thead, tbody = node.children
             headers = [c.children[0].content for c in thead.children[0].children]
+            add_comment_column = headers[0] != "#" and result and "#" in result[0]
+            if add_comment_column:
+                headers.insert(0, "#")
             rows = tbody.children
             rows = [[c.children[0].content for c in row.children] for row in rows]
-            result = []
             for values in rows:
+                if add_comment_column:
+                    values.insert(0, None)
                 row_dict = _row_to_dict(headers, values)
                 if row_dict:
                     result.append(row_dict)
@@ -242,7 +304,7 @@ def main():
     args = parser.parse_args()
 
     if args.file.suffix == ".xlsx":
-        if args.markdown:
+        if args.markdown or (args.output and args.output.suffix == ".md"):
             args.output = args.output or args.file.with_suffix(".md")
             _check_existing_output(args.output, args.force)
             xlsform_to_markdown(args.file, args.output)
