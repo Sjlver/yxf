@@ -71,3 +71,9 @@ Please run all of the following before committing:
 - Format the code: `black .`
 - Run unit tests: `pytest`
 - See lint warnings (and please fix them :)): `pylint yxf`
+
+To publish on PyPI:
+
+- Increment the version number in `setup.cfg`.
+- Run `python -m build`.
+- Upload using `python -m twine upload dist/*-version-*`.
