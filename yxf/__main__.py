@@ -44,6 +44,7 @@ def _convert_sheet(sheet):
     result = []
     for row in xlsform.content_rows(sheet, values_only=True):
         values = xlsform.truncate_row(row)
+        values = [xlsform.stringify_value(v) for v in values]
         row_dict = _row_to_dict(headers, values)
         if row_dict:
             result.append(row_dict)
@@ -172,14 +173,29 @@ def xlsform_to_markdown(filename: pathlib.Path, target: pathlib.Path):
         # We simply put them as paragraphs in the Markdown file.
         for row in sheet:
             if "#" in row:
-                md.append(row["#"])
-                md.append("")
+                if row["#"]:
+                    md.append(row["#"])
+                    md.append("")
                 del row["#"]
 
         if headers[0] == "#":
             headers.pop(0)
             del header_indices["#"]
             header_indices = {k: v - 1 for (k, v) in header_indices.items()}
+
+        for i, row in enumerate(sheet):
+            for k, v in row.items():
+                # Markdown does not support multi-line entries in cells. Check
+                # and complain if needed.
+                if "\n" in v:
+                    log.warning(
+                        f"{filename.name}:{i + 2} Multi-line value for column {k}.\n"
+                        "Markdown does not support multi-line values. Use YAML instead."
+                    )
+                    v = v.replace("\n", " ")
+                # Markdown uses "|" as a table cell separator. Escape it if it
+                # occurs in one of the values. And duplicate each escape character.
+                row[k] = v.replace("\\", "\\\\").replace("|", "\\|")
 
         # Find column widths
         widths = [len(h) for h in headers]
@@ -262,7 +278,7 @@ def markdown_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
             rows = [[c.children[0].content for c in row.children] for row in rows]
             for values in rows:
                 if add_comment_column:
-                    values.insert(0, None)
+                    values.insert(0, "")
                 row_dict = _row_to_dict(headers, values)
                 if row_dict:
                     result.append(row_dict)

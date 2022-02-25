@@ -31,10 +31,18 @@ def truncate_row(row):
     return row
 
 
+def stringify_value(v):
+    """Converts a value to string in a way that's meaningful for values read from Excel."""
+    return str(v) if v else ""
+
+
 def headers(sheet):
     """Returns the values of the sheet's header row (i.e., the first row)."""
 
-    return truncate_row(next(sheet.iter_rows(values_only=True)))
+    return [
+        stringify_value(h)
+        for h in truncate_row(next(sheet.iter_rows(values_only=True)))
+    ]
 
 
 def content_rows(sheet, **kwargs):
