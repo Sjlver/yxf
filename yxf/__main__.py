@@ -113,6 +113,11 @@ def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
         f.write(strictyaml.as_document(result).as_yaml())
 
 
+def xlsform_to_markdown(filename: pathlib.Path, target: pathlib.Path):
+    """Convert XLSForm file `filename` to Markdown file `target`."""
+
+    log.info("xlsform_to_markdown: %s -> %s", filename, target)
+
 def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
     """Convert YAML file `filename` to XLSForm file `target`."""
 
@@ -140,6 +145,10 @@ def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
     xlsform.make_pretty(wb)
     wb.save(target)
 
+def markdown_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
+    """Convert Markdown file `filename` to XLSForm file `target`."""
+
+    log.info("markdown_to_xlsform: %s -> %s", filename, target)
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -148,6 +157,11 @@ def main():
         description="Convert from XLSForm to YAML and back"
     )
     parser.add_argument("file", type=pathlib.Path, help="a file to be converted")
+    parser.add_argument(
+        "--markdown",
+        action="store_true",
+        help="use Markdown instead of YAML",
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -163,13 +177,22 @@ def main():
     args = parser.parse_args()
 
     if args.file.suffix == ".xlsx":
-        args.output = args.output or args.file.with_suffix(".yaml")
-        _check_existing_output(args.output, args.force)
-        xlsform_to_yaml(args.file, args.output)
+        if args.markdown:
+            args.output = args.output or args.file.with_suffix(".md")
+            _check_existing_output(args.output, args.force)
+            xlsform_to_markdown(args.file, args.output)
+        else:
+            args.output = args.output or args.file.with_suffix(".yaml")
+            _check_existing_output(args.output, args.force)
+            xlsform_to_yaml(args.file, args.output)
     elif args.file.suffix == ".yaml":
         args.output = args.output or args.file.with_suffix(".xlsx")
         _check_existing_output(args.output, args.force)
         yaml_to_xlsform(args.file, args.output)
+    elif args.file.suffix == ".md":
+        args.output = args.output or args.file.with_suffix(".xlsx")
+        _check_existing_output(args.output, args.force)
+        markdown_to_xlsform(args.file, args.output)
     else:
         raise ValueError(f"Unrecognized file extension: {args.file}")
 

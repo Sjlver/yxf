@@ -20,6 +20,20 @@ Here's a screenshot showing the YAML and XLSForm version of a form side-by-side:
 
 ![YAML and XLSForm version of a form](https://github.com/Sjlver/yxf/blob/main/docs/yxf-yaml-and-xlsx-side-by-side.png)
 
+### Using Markdown
+
+yxf can generate and read Markdown instead of YAML. The format is taken from
+[md2xlsform](https://github.com/joshuaberetta/md2xlsform). This can be useful if
+you would like something more compact than YAML, e.g., to paste into a community
+forum.
+
+To use Markdown, add a `--markdown` argument to the yxf invocation:
+
+```shell
+# Will generate form.md
+python -m yxf --markdown form.xlsx
+```
+
 ## Installation
 
 Get the latest version from the GitHub repo:
