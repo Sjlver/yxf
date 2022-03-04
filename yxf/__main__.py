@@ -58,8 +58,13 @@ def _convert_to_sheet(sheet, rows, keys):
         sheet.cell(row=1, column=i + 1, value=key)
 
     next_row = 2
+    previous_list_name = rows[0].get("list_name") if rows else None
     for row in rows:
         if row.get("type") == "begin_group":
+            next_row += 1
+
+        if row.get("list_name") != previous_list_name:
+            previous_list_name = row.get("list_name")
             next_row += 1
 
         if not all(k in key_set for k in row.keys()):
