@@ -31,7 +31,7 @@ log = logging.getLogger("yxf.__main__")
 def _row_to_dict(headers, values):
     row_dict = collections.OrderedDict()
     for h, v in zip(headers, values):
-        if v is None:
+        if v is None or v == "":
             continue
         if h is None:
             raise ValueError(f"Cell with no column header: {v}")
