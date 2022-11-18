@@ -194,8 +194,11 @@ def xlsform_to_markdown(filename: pathlib.Path, target: pathlib.Path):
                 # and complain if needed.
                 if "\n" in v:
                     log.warning(
-                        f"{filename.name}:{i + 2} Multi-line value for column {k}.\n"
-                        "Markdown does not support multi-line values. Use YAML instead."
+                        "%s:%d Multi-line value for column %s.\n"
+                        "Markdown does not support multi-line values. Use YAML instead.",
+                        filename.name,
+                        i + 2,
+                        k,
                     )
                     v = v.replace("\n", " ")
                 # Markdown uses "|" as a table cell separator. Escape it if it
