@@ -1,6 +1,5 @@
 """Functions to add XLSForm-specific logic to openpyxl Worksheets."""
 
-import grapefruit
 import openpyxl.styles
 import openpyxl.utils
 
@@ -20,7 +19,23 @@ COMMENT_STYLE.font = openpyxl.styles.Font(name="Courier New", color="ff009c5d")
 NOTE_STYLE = openpyxl.styles.NamedStyle(name="note")
 NOTE_STYLE.font = openpyxl.styles.Font(color="ff555555")
 
-GROUP_COLOR = grapefruit.Color.NewFromHtml("#c7ffdb")
+# Colors for groups. These are essentially "oklch(0.8 - j*0.07, 0.25, 30*i)".
+# Each row has a different hue, and values get darker with increasing column.
+GROUP_COLORS = [
+    ["#ff88d7", "#ff6ec1", "#ff54ab", "#ff3795"],
+    ["#ff8e72", "#ff745b", "#ff5a43", "#ff3d29"],
+    ["#ffab00", "#ff9300", "#ff7a00", "#ff6200"],
+    ["#ffd100", "#ffb900", "#eea200", "#d78b00"],
+    ["#cbf300", "#b5db00", "#9fc400", "#8bad00"],
+    ["#00ff7c", "#00f165", "#00d94d", "#00c233"],
+    ["#00ffe4", "#00f7ce", "#00dfb7", "#00c8a1"],
+    ["#00ffff", "#00edff", "#00d5ff", "#00bdef"],
+    ["#00edff", "#00d4ff", "#00bcff", "#00a5ff"],
+    ["#a0cdff", "#8bb5ff", "#769dff", "#6386ff"],
+    ["#faafff", "#e397ff", "#cc80ff", "#b668ff"],
+    ["#ff96ff", "#ff7eff", "#ff66fa", "#eb4de3"],
+    ["#ff88d7", "#ff6ec1", "#ff54ab", "#ff3795"],
+]
 
 
 def truncate_row(row):
@@ -121,22 +136,24 @@ def make_pretty(wb: openpyxl.Workbook):
 
         # Highlight groups and nesting
         group_number = 0
-        color_stack = []
+        nesting_depth = 0
         if type_column >= 0:
             for row in content_rows(sheet):
                 if str(row[type_column].value).startswith("begin_"):
-                    if not color_stack:
-                        h, s, v = GROUP_COLOR.hsv
-                        h += 20 * group_number
+                    if nesting_depth == 0:
                         group_number += 1
-                        color_stack.append(grapefruit.Color.NewFromHsv(h, s, v))
-                    else:
-                        color_stack.append(color_stack[-1].DarkerColor(0.05))
+                    nesting_depth += 1
 
-                if color_stack:
+                if nesting_depth > 0:
+                    group_colors = GROUP_COLORS[group_number % len(GROUP_COLORS)]
+                    cell_color = group_colors[
+                        nesting_depth - 1
+                        if nesting_depth <= len(group_colors)
+                        else len(group_colors) - 1
+                    ]
                     row[comment_column].fill = openpyxl.styles.PatternFill(
-                        fgColor="ff" + color_stack[-1].html[1:], fill_type="solid"
+                        fgColor="ff" + cell_color[1:], fill_type="solid"
                     )
 
                 if str(row[type_column].value).startswith("end_"):
-                    color_stack.pop()
+                    nesting_depth -= 1

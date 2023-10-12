@@ -1,5 +1,4 @@
 black
-grapefruit==0.1a4
 markdown-it-py~=2.0
 openpyxl~=3.0
 pylint
