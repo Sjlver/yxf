@@ -54,10 +54,11 @@ def stringify_value(v):
 def headers(sheet):
     """Returns the values of the sheet's header row (i.e., the first row)."""
 
-    return [
-        stringify_value(h)
-        for h in truncate_row(next(sheet.iter_rows(values_only=True)))
-    ]
+    for row in sheet.iter_rows(values_only=True):
+        return [stringify_value(h) for h in truncate_row(row)]
+
+    # If we get here, the sheet is empty.
+    return []
 
 
 def content_rows(sheet, **kwargs):
@@ -78,8 +79,9 @@ def make_pretty(wb: openpyxl.Workbook):
     structure of the file.
     """
     for sheet in wb:
-        for cell in sheet[1]:
-            cell.style = HEADER_STYLE
+        if sheet.max_row >= 1:
+            for cell in sheet[1]:
+                cell.style = HEADER_STYLE
         sheet.freeze_panes = sheet["A2"]
 
         sheet_headers = headers(sheet)
