@@ -63,7 +63,7 @@ python -m yxf -o form-pretty.xlsx form.yaml
 
 ## Development
 
-yxf is in an early stage of development. Feedback and contributions are welcome.
+yxf is still being developed. Feedback and contributions are welcome.
 Please open issues in the [issue tracker](https://github.com/Sjlver/yxf/issues).
 
 Please run all of the following before committing:
