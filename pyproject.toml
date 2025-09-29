@@ -11,10 +11,9 @@ keywords = ["xlsform", "xlsx", "odk", "pyxform"]
 classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
 ]
-license = { file = "LICENSE" }
+license = "BSD-2-Clause"
 dependencies = [
     "markdown-it-py~=4.0",
     "openpyxl~=3.0",
