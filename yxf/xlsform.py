@@ -39,7 +39,11 @@ GROUP_COLORS = [
 
 
 def truncate_row(row):
-    """Returns the row without any empty cells at the end."""
+    """Returns the row without any empty cells at the end.
+
+    >>> truncate_row([1, 2, 3, None, None, None])
+    [1, 2, 3]
+    """
     row = list(row)
     while row and row[-1] is None:
         row.pop()
@@ -117,9 +121,9 @@ def make_pretty(wb: openpyxl.Workbook):
                     openpyxl.utils.get_column_letter(i + 1)
                 ].width = 60
                 for row_index, _ in enumerate(sheet):
-                    sheet.cell(
-                        row=row_index + 1, column=i + 1
-                    ).alignment = openpyxl.styles.Alignment(wrap_text=True)
+                    sheet.cell(row=row_index + 1, column=i + 1).alignment = (
+                        openpyxl.styles.Alignment(wrap_text=True)
+                    )
 
         # Apply specific styles to known special columns or rows
         code_columns = set(
@@ -148,11 +152,8 @@ def make_pretty(wb: openpyxl.Workbook):
 
                 if nesting_depth > 0:
                     group_colors = GROUP_COLORS[group_number % len(GROUP_COLORS)]
-                    cell_color = group_colors[
-                        nesting_depth - 1
-                        if nesting_depth <= len(group_colors)
-                        else len(group_colors) - 1
-                    ]
+                    color_index = min(nesting_depth - 1, len(group_colors) - 1)
+                    cell_color = group_colors[color_index]
                     row[comment_column].fill = openpyxl.styles.PatternFill(
                         fgColor="ff" + cell_color[1:], fill_type="solid"
                     )

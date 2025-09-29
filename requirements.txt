@@ -1,7 +1,0 @@
-black
-markdown-it-py~=2.0
-openpyxl~=3.0
-pylint
-pytest~=7.0
-pyxform~=1.8
-strictyaml~=1.6

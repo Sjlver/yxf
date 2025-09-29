@@ -1,6 +1,48 @@
-[build-system]
-requires = [
-    "setuptools>=60",
-    "wheel"
+[project]
+name = "yxf"
+version = "0.5.0"
+description = "Convert from XLSForm to YAML and back"
+readme = "README.md"
+authors = [
+    { name = "Jonas Wagner", email = "jonas@purpureus.net" },
 ]
+requires-python = ">=3.10"
+keywords = ["xlsform", "xlsx", "odk", "pyxform"]
+classifiers = [
+    "Topic :: Utilities",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+license = { file = "LICENSE" }
+dependencies = [
+    "markdown-it-py~=4.0",
+    "openpyxl~=3.0",
+    "strictyaml~=1.6",
+]
+
+[project.urls]
+homepage = "https://github.com/Sjlver/yxf"
+documentation = "https://github.com/Sjlver/yxf"
+repository = "https://github.com/Sjlver/yxf"
+"Bug Tracker" = "https://github.com/Sjlver/yxf/issues"
+
+[dependency-groups]
+dev = [
+    "black",
+    "pylint",
+    "pytest~=8.4",
+]
+
+[project.scripts]
+yxf = "yxf.__main__:main"
+
+[build-system]
+requires = ["setuptools>=60", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["yxf"]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
