@@ -38,7 +38,7 @@ python -m yxf --markdown form.xlsx
 
 Get the latest version from the GitHub repo:
 
-```
+```shell
 python -m pip install yxf
 ```
 
@@ -56,9 +56,20 @@ yxf tries hard to make the XLSForm files look pretty. It is possible to use yxf
 just for that purpose, without intending to store forms as YAML files. To do so,
 simply convert a form to YAML and back:
 
-```
+```shell
 python -m yxf form.xlsx
 python -m yxf -o form-pretty.xlsx form.yaml
+```
+
+## Validating the form
+
+yxf does not deeply validate forms. If you'd like to make sure that a form is
+semantically valid, you can use the `xls2xform` command from the `pyxform`
+package:
+
+```shell
+python -m pip install pyxform
+xls2xform form.xlsx
 ```
 
 ## Development
@@ -74,6 +85,6 @@ Please run all of the following before committing:
 
 To publish on PyPI:
 
-- Increment the version number in `setup.cfg`.
-- Run `python -m build`.
-- Upload using `python -m twine upload dist/*-version-*`.
+- Increment the version number in `pyproject.toml`.
+- Run `uv build`.
+- Upload using `python -m twine upload dist/*`.

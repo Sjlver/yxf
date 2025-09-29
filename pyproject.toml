@@ -4,34 +4,34 @@ version = "0.5.0"
 description = "Convert from XLSForm to YAML and back"
 readme = "README.md"
 authors = [
-    { name = "Jonas Wagner", email = "ltlygwayh@gmail.com" },
+    { name = "Jonas Wagner", email = "jonas@purpureus.net" },
 ]
-requires-python = ">=3.7"
-keywords = ["xlsform", "xlsx", "odk", "pxform"]
+requires-python = ">=3.10"
+keywords = ["xlsform", "xlsx", "odk", "pyxform"]
 classifiers = [
     "Topic :: Utilities",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
 ]
+license = { file = "LICENSE" }
 dependencies = [
-    "markdown-it-py>=2.0",
-    "openpyxl>=3.0",
-    "pyxform>=1.8",
-    "strictyaml>=1.6",
+    "markdown-it-py~=4.0",
+    "openpyxl~=3.0",
+    "strictyaml~=1.6",
 ]
 
 [project.urls]
-homepage = "https://github.com/Sjlver/yxf.git"
-documentation = "https://github.com/Sjlver/yxf.git"
-repository = "https://github.com/Sjlver/yxf.git"
+homepage = "https://github.com/Sjlver/yxf"
+documentation = "https://github.com/Sjlver/yxf"
+repository = "https://github.com/Sjlver/yxf"
+"Bug Tracker" = "https://github.com/Sjlver/yxf/issues"
 
 [dependency-groups]
 dev = [
     "black",
     "pylint",
-    "pytest~=7.0",
+    "pytest~=8.4",
 ]
 
 [project.scripts]
@@ -42,8 +42,7 @@ requires = ["setuptools>=60", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-package-dir = { "yxf" = "yxf" }
 packages = ["yxf"]
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules --ignore=Lib"
+addopts = "--doctest-modules"
