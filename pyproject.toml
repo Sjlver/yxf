@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Jonas Wagner", email = "jonas@purpureus.net" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 keywords = ["xlsform", "xlsx", "odk", "pyxform"]
 classifiers = [
     "Topic :: Utilities",
@@ -15,9 +15,9 @@ classifiers = [
 ]
 license = "BSD-2-Clause"
 dependencies = [
-    "markdown-it-py~=4.0",
-    "openpyxl~=3.0",
-    "strictyaml~=1.6",
+    "markdown-it-py>=2.0",
+    "openpyxl>=3.0",
+    "strictyaml>=1.6",
 ]
 
 [project.urls]
@@ -30,7 +30,7 @@ repository = "https://github.com/Sjlver/yxf"
 dev = [
     "black",
     "pylint",
-    "pytest~=8.4",
+    "pytest>=8.0",
 ]
 
 [project.scripts]
