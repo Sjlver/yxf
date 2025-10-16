@@ -1,6 +1,6 @@
 [project]
 name = "yxf"
-version = "0.5.1"
+version = "1.0.0"
 description = "Convert from XLSForm to YAML and back"
 readme = "README.md"
 authors = [
@@ -31,6 +31,9 @@ dev = [
     "black",
     "pylint",
     "pytest>=8.0",
+]
+test = [
+    "pytest>=8.4.2",
 ]
 
 [project.scripts]

@@ -404,7 +404,7 @@ wheels = [
 
 [[package]]
 name = "yxf"
-version = "0.5.0"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "markdown-it-py", version = "3.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
@@ -417,6 +417,9 @@ dependencies = [
 dev = [
     { name = "black" },
     { name = "pylint" },
+    { name = "pytest" },
+]
+test = [
     { name = "pytest" },
 ]
 
@@ -433,3 +436,4 @@ dev = [
     { name = "pylint" },
     { name = "pytest", specifier = ">=8.0" },
 ]
+test = [{ name = "pytest", specifier = ">=8.4.2" }]
