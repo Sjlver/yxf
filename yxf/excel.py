@@ -28,6 +28,13 @@ def row_to_dict(headers, values):
 
     Raises:
         ValueError: If a non-empty value has no corresponding header
+
+    >>> row_to_dict(["name", "type", "label"], ["q1", "text", "Question 1"])
+    OrderedDict({'name': 'q1', 'type': 'text', 'label': 'Question 1'})
+    >>> row_to_dict(["name", "type"], ["q1", ""])
+    OrderedDict({'name': 'q1'})
+    >>> row_to_dict(["name", "type"], ["q1", None])
+    OrderedDict({'name': 'q1'})
     """
     row_dict = collections.OrderedDict()
     for h, v in zip(headers, values):
@@ -114,6 +121,14 @@ def validate_sheet_name(sheet_name, source_name, line):
 
     Raises:
         ValueError: If sheet name is not valid
+
+    >>> validate_sheet_name("survey", "test.yaml", 1)
+    >>> validate_sheet_name("choices", "test.yaml", 1)
+    >>> validate_sheet_name("settings", "test.yaml", 1)
+    >>> validate_sheet_name("invalid", "test.yaml", 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: test.yaml:1: Invalid sheet name (must be survey, choices, or settings): invalid
     """
     if sheet_name not in ["survey", "choices", "settings"]:
         raise ValueError(

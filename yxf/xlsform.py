@@ -51,7 +51,17 @@ def truncate_row(row):
 
 
 def stringify_value(v):
-    """Converts a value to string in a way that's meaningful for values read from Excel."""
+    """Converts a value to string in a way that's meaningful for values read from Excel.
+
+    >>> stringify_value("hello")
+    'hello'
+    >>> stringify_value(42)
+    '42'
+    >>> stringify_value(None)
+    ''
+    >>> stringify_value("")
+    ''
+    """
     return str(v) if v else ""
 
 
