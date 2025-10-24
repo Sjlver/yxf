@@ -59,7 +59,9 @@ def read_markdown(content: str, source_name: str = "<input>") -> dict:
                 )
             thead, tbody = node.children
             headers = [c.children[0].content for c in thead.children[0].children]
-            add_comment_column = headers[0] != "#" and result and "#" in result[0]
+            add_comment_column = (
+                headers[0] != "#" and len(result) > 0 and "#" in result[0]
+            )
             if add_comment_column:
                 headers.insert(0, "#")
             rows = tbody.children
