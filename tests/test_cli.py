@@ -1,6 +1,5 @@
 """Unit tests for CLI argument parsing and file handling."""
 
-import collections
 import pytest
 
 from yxf import cli, write_xlsform
@@ -27,7 +26,7 @@ SAMPLE_MARKDOWN_CONTENT = """
 """
 
 SAMPLE_FORM = {
-    "survey": [collections.OrderedDict([("type", "text"), ("name", "q1")])],
+    "survey": [{"type": "text", "name": "q1"}],
     "yxf": {"headers": {"survey": ["type", "name"]}},
 }
 

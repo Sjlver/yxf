@@ -114,6 +114,8 @@ def test_markdown_roundtrip_via_yaml(excel_file):
     yaml_after_markdown = write_yaml(form3)
 
     # Compare the YAMLs (they should be very similar, though comments may differ)
+    assert yaml_baseline == yaml_after_markdown
+
     # We check that the structure is preserved
     assert "survey" in yaml_after_markdown
     assert "yxf" in yaml_after_markdown

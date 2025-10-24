@@ -5,7 +5,6 @@ XLSForm dictionaries. Functions work with strings rather than file objects
 for maximum flexibility.
 """
 
-import collections
 import logging
 import re
 
@@ -33,8 +32,8 @@ def read_markdown(content: str, source_name: str = "<input>") -> dict:
     """
     parser = markdown_it.MarkdownIt("js-default")
     ast = markdown_it.tree.SyntaxTreeNode(parser.parse(content))
-    form = collections.OrderedDict()
-    form_headers = collections.OrderedDict()
+    form = {}
+    form_headers = {}
     sheet_name = None
     result = []
 
