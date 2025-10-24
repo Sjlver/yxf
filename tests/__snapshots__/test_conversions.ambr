@@ -223,7 +223,7 @@
     label::English (en): Record your location
     label::French (fr): Enregistrez votre position
     required: true()
-    relevant: '${age} >= 18 '
+    relevant: ${age} >= 18
     appearance: hide-input
   - type: audit
     name: audit

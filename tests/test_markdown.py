@@ -35,16 +35,30 @@ class TestReadMarkdown:
         md_content = """
 ## survey
 
-| type | name | label      |
-| ---- | ---- | ---------- |
-| text | q1   | Question 1 |
+| type               | name | label      |
+| ------------------ | ---- | ---------- |
+| text               | q1   | Question 1 |
+| integer            | q2   | Question 2 |
+| select_one choices | q3   | Question 3 |
 """
         form = read_markdown(md_content, "test.md")
         assert "survey" in form
-        assert len(form["survey"]) == 1
+        assert len(form["survey"]) == 3
+
+        # Check first row
         assert form["survey"][0]["type"] == "text"
         assert form["survey"][0]["name"] == "q1"
         assert form["survey"][0]["label"] == "Question 1"
+
+        # Check second row
+        assert form["survey"][1]["type"] == "integer"
+        assert form["survey"][1]["name"] == "q2"
+        assert form["survey"][1]["label"] == "Question 2"
+
+        # Check third row
+        assert form["survey"][2]["type"] == "select_one choices"
+        assert form["survey"][2]["name"] == "q3"
+        assert form["survey"][2]["label"] == "Question 3"
 
     def test_comment_paragraphs_added_to_rows(self):
         """Test that paragraphs are treated as comments."""
@@ -56,11 +70,15 @@ This is a comment paragraph.
 | type | name | label      |
 | ---- | ---- | ---------- |
 | text | q1   | Question 1 |
+| text | q2   | Question 2 |
 """
         form = read_markdown(md_content, "test.md")
         # Comments should be added to the beginning of the sheet
         assert form["survey"][0]["#"] == "This is a comment paragraph."
         assert form["survey"][1]["name"] == "q1"
+        assert form["survey"][1]["label"] == "Question 1"
+        assert form["survey"][2]["name"] == "q2"
+        assert form["survey"][2]["label"] == "Question 2"
 
     def test_escaped_pipe_in_markdown(self):
         """Test that escaped pipes in markdown are handled."""
@@ -74,6 +92,38 @@ This is a comment paragraph.
         form = read_markdown(md_content, "test.md")
         # The pipe should be unescaped when parsing
         assert form["survey"][0]["label"] == "Question with | pipe"
+
+    def test_multiple_rows_with_empty_cells(self):
+        """Test parsing multiple rows where some cells are empty."""
+        md_content = """
+## survey
+
+| type                | name   | label | required |
+| ------------------- | ------ | ----- | -------- |
+| text                | q1     | Q1    | yes      |
+| select_one choices  | q2     | Q2    |          |
+| integer             | q3     | Q3    | yes      |
+"""
+        form = read_markdown(md_content, "test.md")
+        assert len(form["survey"]) == 3
+
+        assert form["survey"][0] == {
+            "type": "text",
+            "name": "q1",
+            "label": "Q1",
+            "required": "yes",
+        }
+        assert form["survey"][1] == {
+            "type": "select_one choices",
+            "name": "q2",
+            "label": "Q2",
+        }
+        assert form["survey"][2] == {
+            "type": "integer",
+            "name": "q3",
+            "label": "Q3",
+            "required": "yes",
+        }
 
 
 class TestWriteMarkdown:
