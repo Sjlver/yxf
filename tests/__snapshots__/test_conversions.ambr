@@ -1,0 +1,317 @@
+# serializer version: 1
+# name: test_excel_to_markdown_snapshot[cascading-select.xlsx]
+  '''
+  ## survey
+  
+  | type                | name            | label           | choice_filter             |
+  | ------------------- | --------------- | --------------- | ------------------------- |
+  | select_one states   | selected_state  | Select a state  |                           |
+  | select_one counties | selected_county | Select a county | state=${selected_state}   |
+  | select_one cities   | selected_city   | Select a city   | county=${selected_county} |
+  
+  ## choices
+  
+  | list_name | name        | label       | state      | county  |
+  | --------- | ----------- | ----------- | ---------- | ------- |
+  | states    | texas       | Texas       |            |         |
+  | states    | washington  | Washington  |            |         |
+  | counties  | king        | King        | washington |         |
+  | counties  | pierce      | Pierce      | washington |         |
+  | counties  | brewster    | Brewster    | texas      |         |
+  | counties  | cameron     | Cameron     | texas      |         |
+  | cities    | brownsville | Brownsville | texas      | cameron |
+  | cities    | harlingen   | Harlingen   | texas      | cameron |
+  | cities    | seattle     | Seattle     | washington | king    |
+  | cities    | redmond     | Redmond     | washington | king    |
+  | cities    | tacoma      | Tacoma      | washington | pierce  |
+  | cities    | puyallup    | Puyallup    | washington | pierce  |
+  
+  ## settings
+  
+  | form_title               | form_id          |
+  | ------------------------ | ---------------- |
+  | Cascading select example | cascading_select |
+  
+  '''
+# ---
+# name: test_excel_to_markdown_snapshot[favorite-color.xlsx]
+  '''
+  ## survey
+  
+  | type              | name                 | label::English (en)                | label::French (fr)                        | required | relevant                         | parameters                                                               | appearance |
+  | ----------------- | -------------------- | ---------------------------------- | ----------------------------------------- | -------- | -------------------------------- | ------------------------------------------------------------------------ | ---------- |
+  | text              | first_name           | What is your first name?           | Quel est votre prénom?                    | true()   |                                  |                                                                          |            |
+  | integer           | age                  | What is your age, ${first_name}?   | Quel âge as-tu, ${first_name}?            | true()   |                                  |                                                                          |            |
+  | select_one colors | favorite_color       | What is your favorite color?       | Quelle est votre couleur préférée?        |          |                                  |                                                                          |            |
+  | text              | favorite_color_other | Please specify your favorite color | Veuillez spécifier votre couleur préférée |          | selected(${favorite_color}, 'o') |                                                                          |            |
+  | geopoint          | location             | Record your location               | Enregistrez votre position                | true()   | ${age} >= 18                     |                                                                          | hide-input |
+  | audit             | audit                |                                    |                                           |          |                                  | location-priority=balanced location-min-interval=60 location-max-age=120 |            |
+  
+  ## choices
+  
+  | list_name | name | label::English (en) | label::French (fr) |
+  | --------- | ---- | ------------------- | ------------------ |
+  | colors    | r    | Red                 | Rouge              |
+  | colors    | y    | Yellow              | Jaune              |
+  | colors    | g    | Green               | Vert               |
+  | colors    | o    | Other               | Autre              |
+  
+  ## settings
+  
+  | form_id   | form_title      | version    | instance_name                               |
+  | --------- | --------------- | ---------- | ------------------------------------------- |
+  | fav_color | Favorite colors | 2022062100 | concat("Favorite colors - ", ${first_name}) |
+  
+  '''
+# ---
+# name: test_excel_to_markdown_snapshot[simple-repeat.xlsx]
+  '''
+  ## survey
+  
+  | type         | name        | label                     |
+  | ------------ | ----------- | ------------------------- |
+  | string       | session_num | Session number            |
+  | date         | today       | Today's date              |
+  | string       | name        | Your name                 |
+  | begin_repeat | observation | Observation               |
+  | string       | thing       | What have you observed?   |
+  | integer      | count       | How many did you observe? |
+  | string       | notes       | Notes                     |
+  | end_repeat   | observation |                           |
+  
+  ## settings
+  
+  | form_id       | version    |
+  | ------------- | ---------- |
+  | simple_repeat | 2022101001 |
+  
+  '''
+# ---
+# name: test_excel_to_markdown_snapshot[xlsform-dot-org-template.xlsx]
+  '''
+  ## survey
+  
+  | type | name | label | hint | required | relevant | appearance | default | constraint | constraint_message | calculation | trigger | choice_filter | parameters | repeat_count | note | image | audio  | video |
+  | ---- | ---- | ----- | ---- | -------- | -------- | ---------- | ------- | ---------- | ------------------ | ----------- | ------- | ------------- | ---------- | ------------ | ---- | ----- | ------ | ----- |
+  
+  ## choices
+  
+  | list_name | name | label |
+  | --------- | ---- | ----- |
+  
+  ## settings
+  
+  | form_title | form_id | version                        | instance_name | default_language | style |
+  | ---------- | ------- | ------------------------------ | ------------- | ---------------- | ----- |
+  |            |         | =TEXT(NOW(), "yyyymmddhhmmss") |               |                  |       |
+  
+  '''
+# ---
+# name: test_excel_to_yaml_snapshot[cascading-select.xlsx]
+  '''
+  survey:
+  - type: select_one states
+    name: selected_state
+    label: Select a state
+  - type: select_one counties
+    name: selected_county
+    label: Select a county
+    choice_filter: state=${selected_state}
+  - type: select_one cities
+    name: selected_city
+    label: Select a city
+    choice_filter: county=${selected_county}
+  choices:
+  - list_name: states
+    name: texas
+    label: Texas
+  - list_name: states
+    name: washington
+    label: Washington
+  - list_name: counties
+    name: king
+    label: King
+    state: washington
+  - list_name: counties
+    name: pierce
+    label: Pierce
+    state: washington
+  - list_name: counties
+    name: brewster
+    label: Brewster
+    state: texas
+  - list_name: counties
+    name: cameron
+    label: Cameron
+    state: texas
+  - list_name: cities
+    name: brownsville
+    label: Brownsville
+    state: texas
+    county: cameron
+  - list_name: cities
+    name: harlingen
+    label: Harlingen
+    state: texas
+    county: cameron
+  - list_name: cities
+    name: seattle
+    label: Seattle
+    state: washington
+    county: king
+  - list_name: cities
+    name: redmond
+    label: Redmond
+    state: washington
+    county: king
+  - list_name: cities
+    name: tacoma
+    label: Tacoma
+    state: washington
+    county: pierce
+  - list_name: cities
+    name: puyallup
+    label: Puyallup
+    state: washington
+    county: pierce
+  settings:
+  - form_title: Cascading select example
+    form_id: cascading_select
+  yxf:
+    headers:
+      survey:
+      - type
+      - name
+      - label
+      - choice_filter
+      choices:
+      - list_name
+      - name
+      - label
+      - state
+      - county
+      settings:
+      - form_title
+      - form_id
+  
+  '''
+# ---
+# name: test_excel_to_yaml_snapshot[favorite-color.xlsx]
+  '''
+  survey:
+  - type: text
+    name: first_name
+    label::English (en): What is your first name?
+    label::French (fr): Quel est votre prénom?
+    required: true()
+  - type: integer
+    name: age
+    label::English (en): What is your age, ${first_name}?
+    label::French (fr): Quel âge as-tu, ${first_name}?
+    required: true()
+  - type: select_one colors
+    name: favorite_color
+    label::English (en): What is your favorite color?
+    label::French (fr): Quelle est votre couleur préférée?
+  - type: text
+    name: favorite_color_other
+    label::English (en): Please specify your favorite color
+    label::French (fr): Veuillez spécifier votre couleur préférée
+    relevant: selected(${favorite_color}, 'o')
+  - type: geopoint
+    name: location
+    label::English (en): Record your location
+    label::French (fr): Enregistrez votre position
+    required: true()
+    relevant: '${age} >= 18 '
+    appearance: hide-input
+  - type: audit
+    name: audit
+    parameters: location-priority=balanced location-min-interval=60 location-max-age=120
+  choices:
+  - list_name: colors
+    name: r
+    label::English (en): Red
+    label::French (fr): Rouge
+  - list_name: colors
+    name: y
+    label::English (en): Yellow
+    label::French (fr): Jaune
+  - list_name: colors
+    name: g
+    label::English (en): Green
+    label::French (fr): Vert
+  - list_name: colors
+    name: o
+    label::English (en): Other
+    label::French (fr): Autre
+  settings:
+  - form_id: fav_color
+    form_title: Favorite colors
+    version: 2022062100
+    instance_name: concat("Favorite colors - ", ${first_name})
+  yxf:
+    headers:
+      survey:
+      - type
+      - name
+      - label::English (en)
+      - label::French (fr)
+      - required
+      - relevant
+      - parameters
+      - appearance
+      choices:
+      - list_name
+      - name
+      - label::English (en)
+      - label::French (fr)
+      settings:
+      - form_id
+      - form_title
+      - version
+      - instance_name
+  
+  '''
+# ---
+# name: test_excel_to_yaml_snapshot[simple-repeat.xlsx]
+  '''
+  survey:
+  - type: string
+    name: session_num
+    label: Session number
+  - type: date
+    name: today
+    label: Today's date
+  - type: string
+    name: name
+    label: Your name
+  - type: begin_repeat
+    name: observation
+    label: Observation
+  - type: string
+    name: thing
+    label: What have you observed?
+  - type: integer
+    name: count
+    label: How many did you observe?
+  - type: string
+    name: notes
+    label: Notes
+  - type: end_repeat
+    name: observation
+  settings:
+  - form_id: simple_repeat
+    version: 2022101001
+  yxf:
+    headers:
+      survey:
+      - type
+      - name
+      - label
+      settings:
+      - form_id
+      - version
+  
+  '''
+# ---
