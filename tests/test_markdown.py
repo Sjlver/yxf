@@ -1,7 +1,5 @@
 """Unit tests for Markdown parsing and generation."""
 
-import collections
-
 import pytest
 
 from yxf.markdown import read_markdown, write_markdown
@@ -84,11 +82,7 @@ class TestWriteMarkdown:
     def test_write_basic_form(self):
         """Test writing a basic form to markdown."""
         form = {
-            "survey": [
-                collections.OrderedDict(
-                    [("type", "text"), ("name", "q1"), ("label", "Question 1")]
-                )
-            ],
+            "survey": [{"type": "text", "name": "q1", "label": "Question 1"}],
             "yxf": {"headers": {"survey": ["type", "name", "label"]}},
         }
         md_output = write_markdown(form)
@@ -100,11 +94,7 @@ class TestWriteMarkdown:
     def test_write_removes_comment_column(self):
         """Test that comment column is removed from markdown tables."""
         form = {
-            "survey": [
-                collections.OrderedDict(
-                    [("#", "A comment"), ("type", "text"), ("name", "q1")]
-                )
-            ],
+            "survey": [{"#": "A comment", "type": "text", "name": "q1"}],
             "yxf": {"headers": {"survey": ["#", "type", "name"]}},
         }
         md_output = write_markdown(form)
@@ -118,11 +108,7 @@ class TestWriteMarkdown:
     def test_write_escapes_pipes(self):
         """Test that pipes are escaped in markdown tables."""
         form = {
-            "survey": [
-                collections.OrderedDict(
-                    [("type", "text"), ("name", "q1"), ("label", "A | B")]
-                )
-            ],
+            "survey": [{"type": "text", "name": "q1", "label": "A | B"}],
             "yxf": {"headers": {"survey": ["type", "name", "label"]}},
         }
         md_output = write_markdown(form)
@@ -133,11 +119,7 @@ class TestWriteMarkdown:
     def test_write_escapes_backslashes(self):
         """Test that backslashes are escaped in markdown tables."""
         form = {
-            "survey": [
-                collections.OrderedDict(
-                    [("type", "text"), ("name", "q1"), ("label", "A \\ B")]
-                )
-            ],
+            "survey": [{"type": "text", "name": "q1", "label": "A \\ B"}],
             "yxf": {"headers": {"survey": ["type", "name", "label"]}},
         }
         md_output = write_markdown(form)
@@ -148,11 +130,7 @@ class TestWriteMarkdown:
     def test_multiline_warning(self, caplog):
         """Test that multiline values generate a warning."""
         form = {
-            "survey": [
-                collections.OrderedDict(
-                    [("type", "text"), ("name", "q1"), ("label", "Line 1\nLine 2")]
-                )
-            ],
+            "survey": [{"type": "text", "name": "q1", "label": "Line 1\nLine 2"}],
             "yxf": {"headers": {"survey": ["type", "name", "label"]}},
         }
         md_output = write_markdown(form)
@@ -160,3 +138,10 @@ class TestWriteMarkdown:
         # Should generate warning and replace newline with space
         assert "Line 1 Line 2" in md_output
 
+        # Check that a warning was logged
+        assert len(caplog.records) == 1
+        assert caplog.records[0].levelname == "WARNING"
+        assert "Multi-line value for column label" in caplog.records[0].message
+        assert (
+            "Markdown does not support multi-line values" in caplog.records[0].message
+        )

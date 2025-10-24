@@ -1,7 +1,5 @@
 """Unit tests for YAML parsing and generation."""
 
-import collections
-
 import pytest
 import strictyaml
 
@@ -86,15 +84,10 @@ class TestWriteYaml:
 
     def test_write_preserves_order(self):
         """Test that write_yaml preserves key order."""
-        form = collections.OrderedDict(
-            [
-                ("yxf", {"headers": {"survey": ["name", "type"]}}),
-                (
-                    "survey",
-                    [collections.OrderedDict([("name", "q1"), ("type", "text")])],
-                ),
-            ]
-        )
+        form = {
+            "yxf": {"headers": {"survey": ["name", "type"]}},
+            "survey": [{"name": "q1", "type": "text"}],
+        }
         yaml_output = write_yaml(form)
 
         # Check that yxf comes before survey in output

@@ -5,7 +5,6 @@ Excel files and Python dictionaries. Functions accept file-like objects (BinaryI
 rather than filenames for maximum flexibility.
 """
 
-import collections
 import logging
 from typing import BinaryIO
 
@@ -17,26 +16,26 @@ log = logging.getLogger(__name__)
 
 
 def row_to_dict(headers, values):
-    """Convert a row of values to an ordered dictionary using headers as keys.
+    """Convert a row of values to a dictionary using headers as keys.
 
     Args:
         headers: List of column headers
         values: List of cell values
 
     Returns:
-        OrderedDict with non-empty values mapped to their headers
+        dict with non-empty values mapped to their headers
 
     Raises:
         ValueError: If a non-empty value has no corresponding header
 
     >>> row_to_dict(["name", "type", "label"], ["q1", "text", "Question 1"])
-    OrderedDict({'name': 'q1', 'type': 'text', 'label': 'Question 1'})
+    {'name': 'q1', 'type': 'text', 'label': 'Question 1'}
     >>> row_to_dict(["name", "type"], ["q1", ""])
-    OrderedDict({'name': 'q1'})
+    {'name': 'q1'}
     >>> row_to_dict(["name", "type"], ["q1", None])
-    OrderedDict({'name': 'q1'})
+    {'name': 'q1'}
     """
-    row_dict = collections.OrderedDict()
+    row_dict = {}
     for h, v in zip(headers, values):
         if v is None or v == "":
             continue
@@ -53,7 +52,7 @@ def _convert_sheet(sheet):
         sheet: openpyxl Worksheet object
 
     Returns:
-        List of OrderedDicts, one per row (excluding header)
+        List of dicts, one per row (excluding header)
     """
     headers = xlsform.headers(sheet)
     result = []
@@ -71,7 +70,7 @@ def _convert_to_sheet(sheet, rows, keys):
 
     Args:
         sheet: openpyxl Worksheet object to write to
-        rows: List of OrderedDicts representing rows
+        rows: List of dicts representing rows
         keys: List of column headers
 
     Returns:
@@ -170,8 +169,8 @@ def read_xlsform(file_obj: BinaryIO) -> dict:
         ValueError: If the workbook doesn't have a "survey" sheet
     """
     wb = openpyxl.load_workbook(file_obj, read_only=True)
-    result = collections.OrderedDict()
-    headers = collections.OrderedDict()
+    result = {}
+    headers = {}
 
     for sheet_name in ["survey", "choices", "settings"]:
         if sheet_name in wb:

@@ -1,6 +1,5 @@
 """Unit tests for Excel-specific logic."""
 
-import collections
 import io
 
 import pytest
@@ -17,16 +16,14 @@ class TestRowToDict:
         headers = ["name", "type", "label"]
         values = ["q1", "text", "Question 1"]
         result = row_to_dict(headers, values)
-        assert result == collections.OrderedDict(
-            [("name", "q1"), ("type", "text"), ("label", "Question 1")]
-        )
+        assert result == {"name": "q1", "type": "text", "label": "Question 1"}
 
     def test_empty_values_skipped(self):
         """Test that empty values are skipped."""
         headers = ["name", "type", "label"]
         values = ["q1", "", None]
         result = row_to_dict(headers, values)
-        assert result == collections.OrderedDict([("name", "q1")])
+        assert result == {"name": "q1"}
 
     def test_value_without_header_raises_error(self):
         """Test that a value without a header raises ValueError."""
@@ -40,7 +37,7 @@ class TestRowToDict:
         headers = ["name", "type", "label"]
         values = ["q1", "text"]  # Shorter than headers
         result = row_to_dict(headers, values)
-        assert result == collections.OrderedDict([("name", "q1"), ("type", "text")])
+        assert result == {"name": "q1", "type": "text"}
 
 
 class TestValidateSheetName:
@@ -102,9 +99,7 @@ class TestWriteXlsform:
     def test_invalid_key_in_row_raises_error(self):
         """Test that a row with an invalid key raises ValueError."""
         form = {
-            "survey": [
-                collections.OrderedDict([("name", "q1"), ("invalid_key", "value")])
-            ],
+            "survey": [{"name": "q1", "invalid_key": "value"}],
             "yxf": {"headers": {"survey": ["name", "type"]}},
         }
 
@@ -115,11 +110,7 @@ class TestWriteXlsform:
     def test_minimal_form_writes_successfully(self):
         """Test that a minimal valid form can be written."""
         form = {
-            "survey": [
-                collections.OrderedDict(
-                    [("name", "q1"), ("type", "text"), ("label", "Question 1")]
-                )
-            ],
+            "survey": [{"name": "q1", "type": "text", "label": "Question 1"}],
             "yxf": {"headers": {"survey": ["name", "type", "label"]}},
         }
 
