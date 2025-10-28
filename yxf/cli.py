@@ -8,7 +8,7 @@ import argparse
 import logging
 import pathlib
 
-from . import excel, markdown, yaml
+from . import excel, markdown, xlsform, yaml
 
 log = logging.getLogger(__name__)
 
@@ -27,78 +27,79 @@ def _check_existing_output(filename: pathlib.Path, force: bool) -> None:
         raise ValueError(f"File already exists (use --force to override): {filename}")
 
 
-def xlsform_to_yaml(filename: pathlib.Path, target: pathlib.Path):
-    """Convert XLSForm file to YAML file.
+def read_xlsform_file(filename: pathlib.Path) -> dict:
+    """Read an XLSForm file and return form dictionary.
 
     Args:
         filename: Path to input Excel file
+
+    Returns:
+        Form dictionary
+    """
+    with open(filename, "rb") as f:
+        return excel.read_xlsform(f)
+
+
+def read_yaml_file(filename: pathlib.Path) -> dict:
+    """Read a YAML file and return form dictionary.
+
+    Args:
+        filename: Path to input YAML file
+
+    Returns:
+        Form dictionary
+    """
+    with open(filename, encoding="utf-8") as f:
+        return yaml.read_yaml(f.read())
+
+
+def read_markdown_file(filename: pathlib.Path) -> dict:
+    """Read a Markdown file and return form dictionary.
+
+    Args:
+        filename: Path to input Markdown file
+
+    Returns:
+        Form dictionary
+    """
+    with open(filename, encoding="utf-8") as f:
+        return markdown.read_markdown(f.read(), filename.name)
+
+
+def write_xlsform_file(form: dict, target: pathlib.Path):
+    """Write form dictionary to an XLSForm file.
+
+    Args:
+        form: Form dictionary
+        target: Path to output Excel file
+    """
+    with open(target, "wb") as f:
+        excel.write_xlsform(form, f)
+
+
+def write_yaml_file(form: dict, target: pathlib.Path):
+    """Write form dictionary to a YAML file.
+
+    Args:
+        form: Form dictionary
         target: Path to output YAML file
     """
-    log.info("xlsform_to_yaml: %s -> %s", filename, target)
-
-    with open(filename, "rb") as f:
-        form = excel.read_xlsform(f)
-
-    excel.ensure_yxf_comment(form, filename.name, "YAML")
     yaml_content = yaml.write_yaml(form)
-
     with open(target, "w", encoding="utf-8") as f:
         f.write(yaml_content)
 
 
-def xlsform_to_markdown(filename: pathlib.Path, target: pathlib.Path):
-    """Convert XLSForm file to Markdown file.
+def write_markdown_file(form: dict, target: pathlib.Path, source_name: str):
+    """Write form dictionary to a Markdown file.
 
     Args:
-        filename: Path to input Excel file
+        form: Form dictionary
         target: Path to output Markdown file
+        source_name: Name of source file (for metadata)
     """
-    log.info("xlsform_to_markdown: %s -> %s", filename, target)
-
-    with open(filename, "rb") as f:
-        form = excel.read_xlsform(f)
-
-    excel.ensure_yxf_comment(form, filename.name, "Markdown")
-    md_content = markdown.write_markdown(form, filename.name)
-
+    md_content = markdown.write_markdown(form, source_name)
     with open(target, "w", encoding="utf-8") as f:
         f.write(md_content)
-
-
-def yaml_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
-    """Convert YAML file to XLSForm file.
-
-    Args:
-        filename: Path to input YAML file
-        target: Path to output Excel file
-    """
-    log.info("yaml_to_xlsform: %s -> %s", filename, target)
-
-    with open(filename, encoding="utf-8") as f:
-        form = yaml.read_yaml(f.read())
-
-    excel.ensure_yxf_comment(form, filename.name, "YAML")
-
-    with open(target, "wb") as f:
-        excel.write_xlsform(form, f)
-
-
-def markdown_to_xlsform(filename: pathlib.Path, target: pathlib.Path):
-    """Convert Markdown file to XLSForm file.
-
-    Args:
-        filename: Path to input Markdown file
-        target: Path to output Excel file
-    """
-    log.info("markdown_to_xlsform: %s -> %s", filename, target)
-
-    with open(filename, encoding="utf-8") as f:
-        form = markdown.read_markdown(f.read(), filename.name)
-
-    excel.ensure_yxf_comment(form, filename.name, "Markdown")
-
-    with open(target, "wb") as f:
-        excel.write_xlsform(form, f)
 
 
 def main():
@@ -130,22 +131,45 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.file.suffix == ".xlsx":
-        if args.markdown or (args.output and args.output.suffix == ".md"):
-            args.output = args.output or args.file.with_suffix(".md")
-            _check_existing_output(args.output, args.force)
-            xlsform_to_markdown(args.file, args.output)
-        else:
-            args.output = args.output or args.file.with_suffix(".yaml")
-            _check_existing_output(args.output, args.force)
-            xlsform_to_yaml(args.file, args.output)
-    elif args.file.suffix == ".yaml":
-        args.output = args.output or args.file.with_suffix(".xlsx")
-        _check_existing_output(args.output, args.force)
-        yaml_to_xlsform(args.file, args.output)
-    elif args.file.suffix == ".md":
-        args.output = args.output or args.file.with_suffix(".xlsx")
-        _check_existing_output(args.output, args.force)
-        markdown_to_xlsform(args.file, args.output)
-    else:
+    # Step 1: Determine input format
+    if args.file.suffix not in [".xlsx", ".yaml", ".md"]:
         raise ValueError(f"Unrecognized file extension: {args.file}")
+    input_format = args.file.suffix.lstrip(".")
+
+    # Step 2: Determine output format
+    if input_format == "xlsx":
+        # XLSForm can go to either YAML or Markdown
+        if args.markdown or (args.output and args.output.suffix == ".md"):
+            output_format = "md"
+        else:
+            output_format = "yaml"
+    else:
+        # YAML and Markdown both go to XLSForm
+        output_format = "xlsx"
+    args.output = args.output or args.file.with_suffix(f".{output_format}")
+
+    _check_existing_output(args.output, args.force)
+    log.info("Converting: %s -> %s", args.file, args.output)
+
+    # Step 3: Read input
+    if input_format == "xlsx":
+        form = read_xlsform_file(args.file)
+    elif input_format == "yaml":
+        form = read_yaml_file(args.file)
+    elif input_format == "md":
+        form = read_markdown_file(args.file)
+
+    # Step 4: Add yxf comment
+    if output_format == "xlsx":
+        canonical_format = "YAML" if input_format == "yaml" else "Markdown"
+    else:
+        canonical_format = "YAML" if output_format == "yaml" else "Markdown"
+    xlsform.ensure_yxf_comment(form, args.file.name, canonical_format)
+
+    # Step 5: Write output
+    if output_format == "xlsx":
+        write_xlsform_file(form, args.output)
+    elif output_format == "yaml":
+        write_yaml_file(form, args.output)
+    elif output_format == "md":
+        write_markdown_file(form, args.output, args.file.name)

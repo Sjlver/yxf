@@ -38,6 +38,26 @@ GROUP_COLORS = [
 ]
 
 
+def ensure_yxf_comment(form, name, file_format):
+    """Ensure the form has a yxf conversion comment in the first row.
+
+    Args:
+        form: Form dictionary to modify
+        name: Name of source file
+        file_format: Format name (e.g., "YAML", "Markdown")
+    """
+    desired_comment = f"Converted by yxf, from {name}. Edit the {file_format} file instead of the Excel file."
+
+    first_line = form["survey"][0]
+    if "#" not in first_line or not first_line["#"].startswith("Converted by yxf,"):
+        form["survey"].insert(0, {"#": desired_comment})
+    else:
+        form["survey"][0]["#"] = desired_comment
+
+    if "#" not in form["yxf"]["headers"]["survey"]:
+        form["yxf"]["headers"]["survey"].insert(0, "#")
+
+
 def truncate_row(row):
     """Returns the row without any empty cells at the end.
 
