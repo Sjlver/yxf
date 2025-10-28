@@ -14,10 +14,8 @@ class TestReadYaml:
         yaml_content = """
 yxf:
   headers:
-    survey:
+    choices:
       - name
-      - type
-      - label
 choices:
   - name: yes
 """

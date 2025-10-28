@@ -42,12 +42,6 @@ def test_excel_to_yaml_snapshot(excel_file, snapshot):
     with open(excel_file, "rb") as f:
         form = read_xlsform(f)
 
-    # Skip xlsform.org template - it has empty sheets that strictyaml can't serialize
-    if "xlsform-dot-org-template" in excel_file.name:
-        pytest.skip(
-            "xlsform.org template has empty sheets that strictyaml cannot serialize"
-        )
-
     yaml_output = write_yaml(form)
     assert yaml_output == snapshot
 
@@ -65,11 +59,6 @@ def test_yaml_roundtrip_stability(excel_file):
 
     This verifies that converting through Excel doesn't lose or alter data.
     """
-    # Skip xlsform.org template - it has empty sheets that strictyaml can't serialize
-    if "xlsform-dot-org-template" in excel_file.name:
-        pytest.skip(
-            "xlsform.org template has empty sheets that strictyaml cannot serialize"
-        )
 
     # Excel → YAML
     with open(excel_file, "rb") as f:
@@ -93,12 +82,6 @@ def test_markdown_roundtrip_via_yaml(excel_file):
     This verifies that Markdown conversion preserves all data needed for YAML.
     Note: We compare via YAML since that's our canonical format.
     """
-    # Skip xlsform.org template - it has empty sheets that strictyaml can't serialize
-    if "xlsform-dot-org-template" in excel_file.name:
-        pytest.skip(
-            "xlsform.org template has empty sheets that strictyaml cannot serialize"
-        )
-
     # Excel → YAML (baseline)
     with open(excel_file, "rb") as f:
         form1 = read_xlsform(f)

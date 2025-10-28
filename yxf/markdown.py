@@ -57,21 +57,23 @@ def read_markdown(content: str, source_name: str = "<input>") -> dict:
                 raise ValueError(
                     f"{source_name}:{node.map[0]}: No sheet name specified for table."
                 )
-            thead, tbody = node.children
+            thead = node.children[0]
             headers = [c.children[0].content for c in thead.children[0].children]
             add_comment_column = (
                 headers[0] != "#" and len(result) > 0 and "#" in result[0]
             )
             if add_comment_column:
                 headers.insert(0, "#")
-            rows = tbody.children
-            rows = [[c.children[0].content for c in row.children] for row in rows]
-            for values in rows:
-                if add_comment_column:
-                    values.insert(0, "")
-                row_dict = row_to_dict(headers, values)
-                if row_dict:
-                    result.append(row_dict)
+            if len(node.children) > 1:
+                tbody = node.children[1]
+                rows = tbody.children
+                rows = [[c.children[0].content for c in row.children] for row in rows]
+                for values in rows:
+                    if add_comment_column:
+                        values.insert(0, "")
+                    row_dict = row_to_dict(headers, values)
+                    if row_dict:
+                        result.append(row_dict)
             form[sheet_name] = result
             form_headers[sheet_name] = headers
 
@@ -91,14 +93,11 @@ def write_markdown(form: dict, source_name: str = "<source>") -> str:
         Markdown string representation of the form
     """
     md = []
-    for sheet_name in ["survey", "choices", "settings"]:
-        if sheet_name not in form:
-            continue
-
+    for sheet_name in form["yxf"]["headers"]:
         md.append(f"## {sheet_name}")
         md.append("")
 
-        sheet = form[sheet_name]
+        sheet = form.get(sheet_name, [])
         headers = form["yxf"]["headers"][sheet_name]
         header_indices = dict(zip(headers, range(len(headers))))
 

@@ -24,9 +24,9 @@ def read_yaml(content: str) -> dict:
     """
     form = strictyaml.load(content).data
 
-    if "yxf" not in form:
+    if "yxf" not in form or "headers" not in form["yxf"]:
         raise ValueError('YAML file must have a "yxf" entry.')
-    if "survey" not in form:
+    if "survey" not in form["yxf"]["headers"]:
         raise ValueError('YAML file must have a "survey" entry.')
 
     return form
@@ -42,4 +42,14 @@ def write_yaml(form: dict) -> str:
     Returns:
         YAML string representation of the form
     """
+
+    if "yxf" not in form or not form["yxf"]:
+        raise ValueError('YAML file must have a "yxf" entry.')
+
+    # Since StrictYAML can't store empty lists, we remove empty sheets from the
+    # form. Their headers are still stored in the yxf entry.
+    for sheet_name in ["survey", "choices", "settings"]:
+        if sheet_name in form and not form[sheet_name]:
+            del form[sheet_name]
+
     return strictyaml.as_document(form).as_yaml()

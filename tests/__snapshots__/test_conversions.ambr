@@ -91,8 +91,8 @@
   '''
   ## survey
   
-  | type | name | label | hint | required | relevant | appearance | default | constraint | constraint_message | calculation | trigger | choice_filter | parameters | repeat_count | note | image | audio  | video |
-  | ---- | ---- | ----- | ---- | -------- | -------- | ---------- | ------- | ---------- | ------------------ | ----------- | ------- | ------------- | ---------- | ------------ | ---- | ----- | ------ | ----- |
+  | type | name | label | hint | required | relevant | appearance | default | constraint | constraint_message | calculation | trigger | choice_filter | parameters | repeat_count | note | image | audio | video |
+  | ---- | ---- | ----- | ---- | -------- | -------- | ---------- | ------- | ---------- | ------------------ | ----------- | ------- | ------------- | ---------- | ------------ | ---- | ----- | ----- | ----- |
   
   ## choices
   
@@ -312,6 +312,46 @@
       settings:
       - form_id
       - version
+  
+  '''
+# ---
+# name: test_excel_to_yaml_snapshot[xlsform-dot-org-template.xlsx]
+  '''
+  settings:
+  - version: =TEXT(NOW(), "yyyymmddhhmmss")
+  yxf:
+    headers:
+      survey:
+      - type
+      - name
+      - label
+      - hint
+      - required
+      - relevant
+      - appearance
+      - default
+      - constraint
+      - constraint_message
+      - calculation
+      - trigger
+      - choice_filter
+      - parameters
+      - repeat_count
+      - note
+      - image
+      - audio
+      - video
+      choices:
+      - list_name
+      - name
+      - label
+      settings:
+      - form_title
+      - form_id
+      - version
+      - instance_name
+      - default_language
+      - style
   
   '''
 # ---

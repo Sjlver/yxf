@@ -180,12 +180,10 @@ def write_xlsform(form: dict, file_obj: BinaryIO) -> None:
         ValueError: If a row contains a key not in the sheet's headers
     """
     wb = openpyxl.Workbook()
-    for sheet_name in form:
-        if sheet_name == "yxf":
-            continue
+    for sheet_name in form["yxf"]["headers"]:
         _convert_to_sheet(
             wb.create_sheet(sheet_name),
-            form[sheet_name],
+            form.get(sheet_name, []),
             form["yxf"]["headers"][sheet_name],
         )
     if wb.active is not None:
