@@ -11,7 +11,7 @@ import re
 import markdown_it
 import markdown_it.tree
 
-from .excel import row_to_dict, validate_sheet_name
+from .xlsform import row_to_dict, validate_sheet_name
 
 log = logging.getLogger(__name__)
 

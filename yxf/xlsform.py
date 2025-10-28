@@ -105,6 +105,61 @@ def content_rows(sheet, **kwargs):
     return rows_iter
 
 
+def row_to_dict(keys, values):
+    """Convert a row of values to a dictionary using headers as keys.
+
+    Args:
+        headers: List of column headers
+        values: List of cell values
+
+    Returns:
+        dict with non-empty values mapped to their headers
+
+    Raises:
+        ValueError: If a non-empty value has no corresponding header
+
+    >>> row_to_dict(["name", "type", "label"], ["q1", "text", "Question 1"])
+    {'name': 'q1', 'type': 'text', 'label': 'Question 1'}
+    >>> row_to_dict(["name", "type"], ["q1", ""])
+    {'name': 'q1'}
+    >>> row_to_dict(["name", "type"], ["q1", None])
+    {'name': 'q1'}
+    """
+    row_dict = {}
+    for h, v in zip(keys, values):
+        if v is None or v == "":
+            continue
+        if h is None:
+            raise ValueError(f"Cell with no column header: {v}")
+        row_dict[h] = v
+    return row_dict
+
+
+def validate_sheet_name(sheet_name, source_name, line):
+    """Validate that a sheet name is one of the allowed XLSForm sheets.
+
+    Args:
+        sheet_name: Name to validate
+        source_name: Name of source file (for error messages)
+        line: Line number (for error messages)
+
+    Raises:
+        ValueError: If sheet name is not valid
+
+    >>> validate_sheet_name("survey", "test.yaml", 1)
+    >>> validate_sheet_name("choices", "test.yaml", 1)
+    >>> validate_sheet_name("settings", "test.yaml", 1)
+    >>> validate_sheet_name("invalid", "test.yaml", 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: test.yaml:1: Invalid sheet name (must be survey, choices, or settings): invalid
+    """
+    if sheet_name not in ["survey", "choices", "settings"]:
+        raise ValueError(
+            f"{source_name}:{line}: Invalid sheet name (must be survey, choices, or settings): {sheet_name}"
+        )
+
+
 def make_pretty(wb: openpyxl.Workbook):
     """Applies styles to the given workbook to make it prettier.
 
