@@ -48,7 +48,7 @@ def ensure_yxf_comment(form, name, file_format):
     """
     desired_comment = f"Converted by yxf, from {name}. Edit the {file_format} file instead of the Excel file."
 
-    first_line = form["survey"][0]
+    first_line = form["survey"][0] if form["survey"] else {}
     if "#" not in first_line or not first_line["#"].startswith("Converted by yxf,"):
         form["survey"].insert(0, {"#": desired_comment})
     else:
@@ -175,7 +175,7 @@ def make_pretty(wb: openpyxl.Workbook):
         nesting_depth = 0
         if type_column >= 0:
             for row in content_rows(sheet):
-                if str(row[type_column].value).startswith("begin_"):
+                if str(row[type_column].value).startswith("begin"):
                     if nesting_depth == 0:
                         group_number += 1
                     nesting_depth += 1
@@ -188,5 +188,5 @@ def make_pretty(wb: openpyxl.Workbook):
                         fgColor="ff" + cell_color[1:], fill_type="solid"
                     )
 
-                if str(row[type_column].value).startswith("end_"):
+                if str(row[type_column].value).startswith("end"):
                     nesting_depth -= 1

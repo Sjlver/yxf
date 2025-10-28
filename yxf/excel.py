@@ -87,7 +87,7 @@ def _convert_to_sheet(sheet, rows, keys):
     next_row = 2
     previous_list_name = rows[0].get("list_name") if rows else None
     for row in rows:
-        if row.get("type") == "begin_group":
+        if row.get("type") in ["begin_group", "begin group"]:
             next_row += 1
 
         if row.get("list_name") != previous_list_name:
@@ -156,11 +156,10 @@ def read_xlsform(file_obj: BinaryIO) -> dict:
         if sheet_name in wb:
             result[sheet_name] = _convert_sheet(wb[sheet_name])
             headers[sheet_name] = xlsform.headers(wb[sheet_name])
-            if headers[sheet_name] and headers[sheet_name][0] != "#":
-                if "#" in headers[sheet_name]:
-                    raise ValueError(
-                        f"The comment column must come first in sheet {sheet_name}."
-                    )
+            if "#" in headers[sheet_name] and headers[sheet_name][0] != "#":
+                raise ValueError(
+                    f"The comment column must come first in sheet {sheet_name}."
+                )
 
     if "survey" not in result:
         raise ValueError('An XLSForm must have a "survey" sheet.')
