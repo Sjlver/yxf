@@ -1,5 +1,7 @@
 """Unit tests for Markdown parsing and generation."""
 
+import copy
+
 import pytest
 
 from yxf.markdown import read_markdown, write_markdown
@@ -195,3 +197,33 @@ class TestWriteMarkdown:
         assert (
             "Markdown does not support multi-line values" in caplog.records[0].message
         )
+
+    def test_does_not_modify_the_form(self):
+        """Test that write_markdown leaves the form it was given untouched.
+
+        It used to delete the comment column from the caller's rows, so that
+        writing Markdown and then YAML silently lost all the comments.
+        """
+        form = {
+            "survey": [
+                {"#": "A comment about fruit.", "type": "text", "name": "q1"},
+                {"type": "note", "name": "q2", "label": "Eat fruit"},
+            ],
+            "yxf": {"headers": {"survey": ["#", "type", "name", "label"]}},
+        }
+        expected = copy.deepcopy(form)
+
+        write_markdown(form, "test.md")
+
+        assert form == expected
+
+    def test_escaping_does_not_modify_the_form(self):
+        """Test that escaping pipes happens on a copy of the row."""
+        form = {
+            "survey": [{"type": "text", "name": "q1", "label": "A | B"}],
+            "yxf": {"headers": {"survey": ["type", "name", "label"]}},
+        }
+
+        write_markdown(form, "test.md")
+
+        assert form["survey"][0]["label"] == "A | B"

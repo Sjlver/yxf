@@ -1,0 +1,897 @@
+survey:
+- '#': A comment about fruit.
+- type: start
+  name: start
+  label::English (en): How many pieces of fruit did you eat yesterday?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+- type: end
+  name: end
+  label::English (en): Which fruit grows in your garden?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+- type: username
+  name: username
+  label::English (en): Do you prefer sweet or sour fruit?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+- type: deviceid
+  name: deviceid
+  label::English (en): How many fruit trees are on this plot?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+- type: phonenumber
+  name: phonenumber
+  label::English (en): Is the fruit ripe today?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+- type: start-geopoint
+  name: start-geopoint
+  label::English (en): Where do you usually buy your fruit?
+  label::Français (fr): Quel est votre fruit préféré ?
+- type: begin_group
+  name: grp_apple
+  label::English (en): How much does a kilo of fruit cost here?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+- type: note
+  name: note_apple
+  label::English (en): Thank you for telling us about your fruit.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): Read the whole list out loud before answering.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: normalize-space(${username}) = ''
+- type: note
+  name: note_banana
+  label::English (en): Please hand the tablet back to the interviewer.
+  label::Français (fr): Veuillez rendre la tablette à l'enquêteur.
+  hint::English (en): Read the whole list out loud before answering.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: normalize-space(${phonenumber}) = ''
+- type: end group
+- type: begin group
+  name: grp_banana
+  label::English (en): Would you like to taste a new kind of fruit?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  appearance: field-list
+- type: note
+  name: note_cherry
+  label::English (en): This section is about the fruit you eat at home.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): If you are not sure, give your best estimate.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+- type: end_group
+- type: begin_group
+  name: grp_cherry
+  label::English (en): Was any fruit left over at the end of the day?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  appearance: field-list
+- type: select_one_from_file orchards.csv
+  name: sel_apple
+  label::English (en): Which fruit keeps the longest in your kitchen?
+  label::Français (fr): Quel est votre fruit préféré ?
+  required: yes
+  appearance: minimal
+- type: select_one_from_file orchards.csv
+  name: sel_banana
+  label::English (en): How often do you eat fruit in a normal week?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  required: yes
+  appearance: minimal
+  choice_filter: l5_id=${sel_apple}
+- type: select_one_from_file orchards.csv
+  name: sel_cherry
+  label::English (en): Did you plant any new fruit trees this season?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  required: yes
+  appearance: minimal
+  choice_filter: l6_id=${sel_banana}
+- type: end group
+- type: begin group
+  name: grp_date
+  label::English (en): How many people in this house like citrus fruit?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  appearance: field-list
+- type: note
+  name: note_date
+  label::English (en): Take a moment before the next basket of questions.
+  label::Français (fr): Veuillez rendre la tablette à l'enquêteur.
+  hint::English (en): Count only fruit that is ripe enough to eat.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+- type: select_one_from_file orchards.csv
+  name: sel_date
+  label::English (en): Is there a fruit you have never tried?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  required: yes
+  appearance: minimal
+  choice_filter: l7_id=${sel_cherry} and display_number != 'apple'
+- type: integer
+  name: num_apple
+  label::English (en): Which fruit do the children ask for most?
+  label::Français (fr): Quel est votre fruit préféré ?
+  hint::English (en): If you are not sure, give your best estimate.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+  relevant: ${sel_date}='banana'
+- type: calculate
+  name: calc_apple
+  relevant: ${num_apple} != ''
+  calculation: pulldata('cherry', 'date', 'elderberry', ${num_apple})
+- type: calculate
+  name: calc_banana
+  relevant: ${num_apple} != ''
+  calculation: pulldata('cherry', 'fig', 'elderberry', ${num_apple})
+- type: calculate
+  name: calc_cherry
+  relevant: ${sel_apple} != ''
+  calculation: jr:choice-name(${sel_apple}, '${sel_apple}')
+- type: calculate
+  name: calc_date
+  relevant: ${sel_banana} != ''
+  calculation: jr:choice-name(${sel_banana}, '${sel_banana}')
+- type: calculate
+  name: calc_elderberry
+  relevant: ${sel_cherry} != ''
+  calculation: jr:choice-name(${sel_cherry}, '${sel_cherry}')
+- type: calculate
+  name: calc_fig
+  calculation: if(${sel_date} != 'banana', ${sel_date}, if(${calc_apple} = 'apple'
+    and ${calc_banana} = ${sel_cherry}, ${num_apple}, ''))
+- type: calculate
+  name: calc_grape
+  relevant: ${calc_fig} != ''
+  calculation: pulldata('cherry', 'grape', 'elderberry', ${calc_fig})
+- type: select_one apple_list
+  name: sel_elderberry
+  label::English (en): Where do you usually buy your fruit?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  hint::English (en): If you are not sure, give your best estimate.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+- type: end_group
+- type: begin_group
+  name: grp_elderberry
+  label::English (en): Which fruit did you last share with a neighbour?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  relevant: ${sel_elderberry} = 'yes' and ${calc_fig} != ''
+- type: geopoint
+  name: geo_apple
+  label::English (en): Would you like to taste a new kind of fruit?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+- type: select_one banana_list
+  name: sel_fig
+  label::English (en): How many baskets did you fill this morning?
+  label::Français (fr): Quel est votre fruit préféré ?
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+  relevant: ${geo_apple} = ""
+- type: select_one cherry_list
+  name: sel_grape
+  label::English (en): Was any fruit left over at the end of the day?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  hint::English (en): Select all the fruit that applies.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+- type: end group
+- type: begin group
+  name: grp_fig
+  label::English (en): How often do you eat fruit in a normal week?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  relevant: ${sel_grape} = 'honeydew'
+- type: geopoint
+  name: geo_banana
+  label::English (en): Did you plant any new fruit trees this season?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+- type: select_one banana_list
+  name: sel_honeydew
+  label::English (en): Which fruit is hardest to find at the market?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  hint::English (en): Any kind of fruit counts, fresh or dried.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${geo_banana} = ""
+- type: select_one date_list
+  name: sel_kiwi
+  label::English (en): How many people in this house like citrus fruit?
+  label::Français (fr): Quel est votre fruit préféré ?
+  hint::English (en): Ask the person who does the shopping.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+- type: end_group
+- type: note
+  name: note_elderberry
+  label::English (en): Remember that every answer stays confidential.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  relevant: ${sel_grape} = 'kiwi' or ${sel_kiwi} = 'no'
+- type: select_one elderberry_list
+  name: sel_lemon
+  label::English (en): Which fruit do the children ask for most?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${sel_grape} = 'yes' or ${sel_kiwi} = 'yes'
+- type: begin_group
+  name: grp_grape
+  label::English (en): How far is the nearest fruit stall?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  relevant: ${sel_lemon} = 'yes'
+- type: integer
+  name: num_banana
+  label::English (en): What is your favorite fruit?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  hint::English (en): Read the whole list out loud before answering.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+  constraint: . > 0 and . <= 1000
+- type: acknowledge
+  name: ack_apple
+  label::English (en): How many pieces of fruit did you eat yesterday?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  hint::English (en): Count only fruit that is ripe enough to eat.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${num_banana} > 10
+- type: begin group
+  name: grp_honeydew
+  label::English (en): Which fruit grows in your garden?
+  label::Français (fr): Quel est votre fruit préféré ?
+  appearance: field-list
+- type: note
+  name: note_fig
+  label::English (en): Thank you for telling us about your fruit.
+  label::Français (fr): Veuillez rendre la tablette à l'enquêteur.
+  hint::English (en): Any kind of fruit counts, fresh or dried.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+- type: integer
+  name: num_cherry
+  label::English (en): Do you prefer sweet or sour fruit?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  required: yes
+  constraint: . >= 0 and . <= 10
+- type: integer
+  name: num_date
+  label::English (en): How many fruit trees are on this plot?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  required: yes
+  constraint: . >= 0 and . <= 10
+- type: integer
+  name: num_elderberry
+  label::English (en): Is the fruit ripe today?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  required: yes
+  constraint: . >= 0 and . <= 10
+- type: integer
+  name: num_fig
+  label::English (en): Where do you usually buy your fruit?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+  constraint: . >= 0 and . <= 10
+- type: integer
+  name: num_grape
+  calculation: coalesce(${num_cherry}, 0) + coalesce(${num_date}, 0) + coalesce(${num_elderberry},
+    0) + coalesce(${num_fig}, 0)
+- type: end group
+- type: select_one tangerine_list
+  name: sel_mango
+  label::English (en): Would you like to taste a new kind of fruit?
+  relevant: false()
+- type: calculate
+  name: calc_honeydew
+  calculation: if(${num_cherry} = 1, concat(', ', jr:choice-name('lemon', '${sel_mango}')),
+    if(${num_cherry} > 1, concat(', ', string(${num_cherry}), '', jr:choice-name('mango',
+    '${sel_mango}')), ''))
+- type: calculate
+  name: calc_kiwi
+  calculation: if(${num_date} = 1, concat(', ', jr:choice-name('nectarine', '${sel_mango}')),
+    if(${num_date} > 1, concat(', ', string(${num_date}), '', jr:choice-name('orange',
+    '${sel_mango}')), ''))
+- type: calculate
+  name: calc_lemon
+  calculation: if(${num_elderberry} = 1, concat(', ', jr:choice-name('papaya', '${sel_mango}')),
+    if(${num_elderberry} > 1, concat(', ', string(${num_elderberry}), '', jr:choice-name('quince',
+    '${sel_mango}')), ''))
+- type: calculate
+  name: calc_mango
+  calculation: if(${num_fig} = 1, concat(', ', jr:choice-name('raspberry', '${sel_mango}')),
+    if(${num_fig} > 1, concat(', ', string(${num_fig}), '', jr:choice-name('strawberry',
+    '${sel_mango}')), ''))
+- type: calculate
+  name: calc_nectarine
+  calculation: substring-after(concat( ${calc_honeydew}, ${calc_kiwi}, ${calc_lemon},
+    ${calc_mango}), ', ')
+- type: acknowledge
+  name: ack_banana
+  label::English (en): Which fruit is hardest to find at the market?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  hint::English (en): Select all the fruit that applies.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+- type: end_group
+- type: begin_group
+  name: grp_kiwi
+  label::English (en): Is there a fruit you have never tried?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  appearance: field-list
+  relevant: ${ack_banana} != ''
+- type: integer
+  name: num_honeydew
+  label::English (en): Which fruit do the children ask for most?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  hint::English (en): If you are not sure, give your best estimate.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+  constraint: . > 0 and . <= 1000
+- type: acknowledge
+  name: ack_cherry
+  label::English (en): How far is the nearest fruit stall?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  hint::English (en): Any kind of fruit counts, fresh or dried.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${num_honeydew} > ${num_banana}
+- type: end group
+- type: begin group
+  name: grp_lemon
+  label::English (en): How many pieces of fruit did you eat yesterday?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  relevant: ${num_honeydew} != ''
+- type: select_one fig_list
+  name: sel_nectarine
+  label::English (en): Which fruit grows in your garden?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+- type: begin_repeat
+  name: rep_apple
+  label::English (en): Do you prefer sweet or sour fruit?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  relevant: ${sel_nectarine} = 'tangerine'
+- type: select_one honeydew_list
+  name: sel_orange
+  label::English (en): How many fruit trees are on this plot?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  hint::English (en): Read the whole list out loud before answering.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+- type: select_one lemon_list
+  name: sel_papaya
+  label::English (en): Is the fruit ripe today?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  hint::English (en): Count only fruit that is ripe enough to eat.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+- type: begin_group
+  name: grp_mango
+  label::English (en): Where do you usually buy your fruit?
+  label::Français (fr): Quel est votre fruit préféré ?
+  appearance: field-list
+- type: note
+  name: note_grape
+  label::English (en): Please hand the tablet back to the interviewer.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): Any kind of fruit counts, fresh or dried.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+- type: integer
+  name: num_kiwi
+  label::English (en): How much does a kilo of fruit cost here?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  required: yes
+  constraint: . >= 0
+- type: end group
+- type: select_one mango_list
+  name: sel_quince
+  label::English (en): Would you like to taste a new kind of fruit?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  hint::English (en): Enter a whole number of pieces.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+- type: integer
+  name: num_lemon
+  calculation: if(${sel_orange} = 'ugli', 1, 0)
+- type: integer
+  name: num_mango
+  calculation: if(${sel_orange} != '' and ${sel_orange} != 'ugli', 1, 0)
+- type: begin group
+  name: grp_nectarine
+  label::English (en): Which fruit keeps the longest in your kitchen?
+  label::Français (fr): Quel est votre fruit préféré ?
+- type: integer
+  name: num_nectarine
+  label::English (en): How often do you eat fruit in a normal week?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  required: yes
+  constraint: . >= 0 and . <= 5
+  constraint_message::English (en): Please enter a number between 0 and 99 pieces
+    of fruit.
+  constraint_message::Français (fr): Combien de fruits avez-vous mangés hier ?
+- type: note
+  name: note_honeydew
+  label::English (en): This section is about the fruit you eat at home.
+  label::Français (fr): Veuillez rendre la tablette à l'enquêteur.
+  hint::English (en): If you are not sure, give your best estimate.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${num_cranberry} > ${num_grape}
+- type: end_group
+- type: end_repeat
+- type: end group
+- type: begin group
+  name: grp_orange
+  label::English (en): Is there a fruit you have never tried?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  relevant: ${num_honeydew} != ''
+- type: select_one grape_list
+  name: sel_raspberry
+  label::English (en): Which fruit do the children ask for most?
+  label::Français (fr): Quel est votre fruit préféré ?
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+- type: begin_repeat
+  name: rep_banana
+  label::English (en): How far is the nearest fruit stall?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  relevant: ${sel_raspberry} = 'tangerine'
+- type: select_one honeydew_list
+  name: sel_strawberry
+  label::English (en): What is your favorite fruit?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  hint::English (en): Read the whole list out loud before answering.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+- type: select_one lemon_list
+  name: sel_tangerine
+  label::English (en): How many pieces of fruit did you eat yesterday?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  hint::English (en): Count only fruit that is ripe enough to eat.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+- type: begin_group
+  name: grp_papaya
+  label::English (en): Which fruit grows in your garden?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  appearance: field-list
+- type: note
+  name: note_kiwi
+  label::English (en): Take a moment before the next basket of questions.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): Any kind of fruit counts, fresh or dried.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+- type: integer
+  name: num_orange
+  label::English (en): Do you prefer sweet or sour fruit?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  required: yes
+  constraint: . >= 0
+- type: integer
+  name: num_papaya
+  label::English (en): How many fruit trees are on this plot?
+  label::Français (fr): Quel est votre fruit préféré ?
+  required: yes
+  constraint: . >= 0
+- type: integer
+  name: num_quince
+  label::English (en): Is the fruit ripe today?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  required: yes
+  constraint: . >= 0
+- type: integer
+  name: num_raspberry
+  label::English (en): Where do you usually buy your fruit?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  required: yes
+  constraint: . >= 0
+- type: end group
+- type: select_one orange_list
+  name: sel_ugli
+  label::English (en): Which fruit did you last share with a neighbour?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  required: yes
+  relevant: coalesce(${num_raspberry}, 0) = 0 and (coalesce(${num_orange}, 0) + coalesce(${num_papaya},
+    0) + coalesce(${num_quince}, 0)) < 20
+- type: text
+  name: txt_apple
+  label::English (en): Would you like to taste a new kind of fruit?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  hint::English (en): Count only fruit that is ripe enough to eat.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${sel_ugli} = 'Other'
+  constraint: regex(., 'vanilla, watermelon')
+  constraint_message::English (en): Please enter a number between 0 and 99 pieces
+    of fruit.
+  constraint_message::Français (fr): Le fruit est-il mûr aujourd'hui ?
+- type: integer
+  name: num_strawberry
+  calculation: if(${sel_strawberry} = 'ugli', 1, 0)
+- type: integer
+  name: num_tangerine
+  calculation: if(${sel_strawberry} != '' and ${sel_strawberry} != 'ugli', 1, 0)
+- type: end repeat
+- type: integer
+  name: num_ugli
+  calculation: sum(${num_lemon}) + sum(${num_strawberry})
+- type: integer
+  name: num_vanilla
+  calculation: sum(${num_mango}) + sum(${num_tangerine})
+- type: integer
+  name: num_watermelon
+  calculation: sum(${num_lemon})
+- type: integer
+  name: num_apricot
+  calculation: sum(${num_mango})
+- type: integer
+  name: num_blueberry
+  calculation: ${num_watermelon} + ${num_apricot}
+- type: integer
+  name: num_cranberry
+  calculation: coalesce(sum(${num_nectarine}), 0)
+- type: end_group
+- type: begin_group
+  name: grp_quince
+  label::English (en): What is your favorite fruit?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  relevant: ${num_honeydew} != ''
+- type: integer
+  name: num_damson
+  label::English (en): How many pieces of fruit did you eat yesterday?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  hint::English (en): Enter a whole number of pieces.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  constraint: . >= ${num_ugli}
+  constraint_message::English (en): Please enter a number between 0 and 99 pieces
+    of fruit.
+  constraint_message::Français (fr): Le fruit est-il mûr aujourd'hui ?
+- type: integer
+  name: num_guava
+  calculation: coalesce(${num_damson}, 0) - coalesce(${num_ugli}, 0)
+- type: end group
+- type: begin group
+  name: grp_raspberry
+  label::English (en): How many fruit trees are on this plot?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  relevant: ${num_guava} > 0
+- type: begin_repeat
+  name: rep_cherry
+  label::English (en): Is the fruit ripe today?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  repeat_count: ${num_guava}
+- type: select_one papaya_list
+  name: sel_vanilla
+  label::English (en): Where do you usually buy your fruit?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  required: yes
+- type: text
+  name: txt_banana
+  label::English (en): How much does a kilo of fruit cost here?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  required: yes
+  relevant: ${sel_vanilla} = 'Other'
+  constraint: regex(., 'vanilla, watermelon')
+  constraint_message::English (en): Please choose one of the fruits in the list.
+  constraint_message::Français (fr): Le fruit est-il mûr aujourd'hui ?
+- type: end_repeat
+- type: end group
+- type: begin group
+  name: grp_strawberry
+  label::English (en): How many baskets did you fill this morning?
+  label::Français (fr): Quel fruit pousse dans votre jardin ?
+  appearance: field-list
+  relevant: ${num_honeydew} != ''
+- type: note
+  name: note_lemon
+  label::English (en): Remember that every answer stays confidential.
+  label::Français (fr): Veuillez rendre la tablette à l'enquêteur.
+  hint::English (en): Select all the fruit that applies.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+- type: note
+  name: note_mango
+  label::English (en): Thank you for telling us about your fruit.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): Select all the fruit that applies.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+- type: acknowledge
+  name: ack_date
+  label::English (en): Was any fruit left over at the end of the day?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  hint::English (en): Select all the fruit that applies.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+- type: end_group
+- type: begin_group
+  name: grp_tangerine
+  label::English (en): How often do you eat fruit in a normal week?
+  label::Français (fr): Le fruit est-il mûr aujourd'hui ?
+  relevant: ${ack_date} != ''
+- type: select_one strawberry_list
+  name: sel_watermelon
+  label::English (en): Did you plant any new fruit trees this season?
+  label::Français (fr): Quel est votre fruit préféré ?
+  hint::English (en): If you are not sure, give your best estimate.
+  hint::Français (fr): Lisez toute la liste à voix haute.
+  required: yes
+- type: acknowledge
+  name: ack_elderberry
+  label::English (en): Which fruit is hardest to find at the market?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  hint::English (en): Any kind of fruit counts, fresh or dried.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+  relevant: ${sel_watermelon} = 'no'
+- type: end group
+- type: begin group
+  name: grp_ugli
+  label::English (en): Is there a fruit you have never tried?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  appearance: field-list
+  relevant: ${sel_watermelon} != ''
+- type: integer
+  name: num_jackfruit
+  label::English (en): Which fruit do the children ask for most?
+  label::Français (fr): Combien coûte un kilo de fruits ici ?
+  hint::English (en): Do not count fruit that has already spoiled.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+  constraint: . >= 0
+- type: note
+  name: note_nectarine
+  label::English (en): Please hand the tablet back to the interviewer.
+  label::Français (fr): Veuillez rendre la tablette à l'enquêteur.
+  hint::English (en): Select all the fruit that applies.
+  hint::Français (fr): Si vous hésitez, donnez une estimation.
+  required: yes
+  relevant: ${num_jackfruit} > ${num_banana}
+- type: end_group
+- type: begin_group
+  name: grp_vanilla
+  label::English (en): What is your favorite fruit?
+  label::Français (fr): Quel est votre fruit préféré ?
+  appearance: field-list
+  relevant: ${sel_watermelon} != '' and ${num_jackfruit} != ''
+- type: select_one nectarine_list
+  name: sel_apricot
+  label::English (en): How many pieces of fruit did you eat yesterday?
+  label::Français (fr): Combien de fruits avez-vous mangés hier ?
+  hint::English (en): Count only fruit that is ripe enough to eat.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+  required: yes
+- type: end group
+- type: begin group
+  name: grp_watermelon
+  label::English (en): Do you prefer sweet or sour fruit?
+  label::Français (fr): Préférez-vous les fruits sucrés ou acides ?
+  appearance: field-list
+  relevant: ${sel_watermelon} != '' and ${num_jackfruit} != ''
+- type: note
+  name: note_orange
+  label::English (en): This section is about the fruit you eat at home.
+  label::Français (fr): Merci de nous avoir parlé de vos fruits.
+  hint::English (en): Ask the person who does the shopping.
+  hint::Français (fr): Ne comptez que les fruits mûrs.
+- type: end_group
+choices:
+- list_name: apple_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: apple_list
+  name: apricot
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: apple_list
+  name: blueberry
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: banana_list
+  name: cranberry
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: banana_list
+  name: damson
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: banana_list
+  name: guava
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: cherry_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: cherry_list
+  name: honeydew
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: cherry_list
+  name: kiwi
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: date_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: date_list
+  name: no
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: elderberry_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: elderberry_list
+  name: no
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: fig_list
+  name: tangerine
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: fig_list
+  name: jackfruit
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: grape_list
+  name: tangerine
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: grape_list
+  name: jackfruit
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: honeydew_list
+  name: ugli
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: honeydew_list
+  name: lime
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: honeydew_list
+  name: melon
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: kiwi_list
+  name: olive
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: kiwi_list
+  name: peach
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: lemon_list
+  name: pear
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: lemon_list
+  name: plum
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: lemon_list
+  name: Other
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: mango_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: mango_list
+  name: no
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: nectarine_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: nectarine_list
+  name: no
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: orange_list
+  name: pomegranate
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: orange_list
+  name: rhubarb
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: orange_list
+  name: satsuma
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: papaya_list
+  name: lychee
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: papaya_list
+  name: avocado
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: papaya_list
+  name: coconut
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: quince_list
+  name: durian
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: quince_list
+  name: gooseberry
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: quince_list
+  name: persimmon
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: raspberry_list
+  name: lemon
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: raspberry_list
+  name: nectarine
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: raspberry_list
+  name: papaya
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+- list_name: strawberry_list
+  name: yes
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: strawberry_list
+  name: no
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: tangerine_list
+  name: lemon
+  label::English (en): Apple
+  label::Français (fr): Pomme
+- list_name: tangerine_list
+  name: nectarine
+  label::English (en): Banana
+  label::Français (fr): Banane
+- list_name: tangerine_list
+  name: papaya
+  label::English (en): Cherry
+  label::Français (fr): Cerise
+settings:
+- instance_name: concat( 'clementine', coalesce(${calc_elderberry}, 'blackberry'),
+    '-', coalesce(${calc_grape}, 'passionfruit'), if(${num_jackfruit} != '', 'starfruit',
+    if(${sel_lemon} != '', 'mulberry', if(${sel_grape} = 'honeydew' and ${sel_kiwi}
+    = '', 'loquat', ''))))
+  default_language: Français (fr)
+yxf:
+  headers:
+    survey:
+    - '#'
+    - type
+    - name
+    - label::English (en)
+    - label::Français (fr)
+    - hint::English (en)
+    - hint::Français (fr)
+    - required
+    - appearance
+    - choice_filter
+    - relevant
+    - default
+    - constraint
+    - constraint_message::English (en)
+    - constraint_message::Français (fr)
+    - calculation
+    - trigger
+    - repeat_count
+    choices:
+    - '#'
+    - list_name
+    - name
+    - label::English (en)
+    - label::Français (fr)
+    settings:
+    - '#'
+    - instance_name
+    - default_language

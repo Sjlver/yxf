@@ -105,6 +105,11 @@
   | ---------- | ------- | ------------------------------ | ------------- | ---------------- | ----- |
   |            |         | =TEXT(NOW(), "yyyymmddhhmmss") |               |                  |       |
   
+  ## entities
+  
+  | list_name | label |
+  | --------- | ----- |
+  
   '''
 # ---
 # name: test_excel_to_yaml_snapshot[cascading-select.xlsx]
@@ -352,6 +357,9 @@
       - instance_name
       - default_language
       - style
+      entities:
+      - list_name
+      - label
   
   '''
 # ---

@@ -54,15 +54,31 @@ def _convert_to_sheet(sheet, rows, keys):
     for i, key in enumerate(keys):
         sheet.cell(row=1, column=i + 1, value=key)
 
+    # Blank rows separate the parts of a sheet, to make it easier to read:
+    # one before every "begin group"/"begin repeat", one after every
+    # "end group"/"end repeat", and one whenever the choice list changes.
+    # Consecutive blank rows are collapsed into one, and a sheet never starts
+    # with a blank row.
     next_row = 2
+    blank_row_pending = False
     previous_list_name = rows[0].get("list_name") if rows else None
     for row in rows:
-        if row.get("type") in ["begin_group", "begin group"]:
+        type_value = row.get("type")
+
+        # A group starting, or a new choice list, asks for a blank row before
+        # this row. The previous row may have asked for one too, by ending a
+        # group; the two requests then collapse into a single blank row.
+        if xlsform.is_group_begin(type_value):
+            blank_row_pending = True
+        if row.get("list_name") != previous_list_name:
+            blank_row_pending = True
+        previous_list_name = row.get("list_name")
+
+        if blank_row_pending and next_row > 2:
             next_row += 1
 
-        if row.get("list_name") != previous_list_name:
-            previous_list_name = row.get("list_name")
-            next_row += 1
+        # A group ending asks for a blank row after this row.
+        blank_row_pending = xlsform.is_group_end(type_value)
 
         if not all(k in key_set for k in row.keys()):
             missing_key = next(k for k in row.keys() if k not in key_set)
@@ -90,6 +106,9 @@ def read_xlsform(file_obj: BinaryIO) -> dict:
         Dictionary with sheet names as keys and lists of row dicts as values.
         Also includes a "yxf" key with metadata including headers.
 
+        Only the sheets in xlsform.KNOWN_SHEETS are converted. Any other sheet
+        (for example a documentation sheet) is ignored.
+
     Raises:
         ValueError: If the workbook doesn't have a "survey" sheet
     """
@@ -97,7 +116,7 @@ def read_xlsform(file_obj: BinaryIO) -> dict:
     result = {}
     headers = {}
 
-    for sheet_name in ["survey", "choices", "settings"]:
+    for sheet_name in xlsform.KNOWN_SHEETS:
         if sheet_name in wb:
             result[sheet_name] = _convert_sheet(wb[sheet_name])
             headers[sheet_name] = xlsform.headers(wb[sheet_name])

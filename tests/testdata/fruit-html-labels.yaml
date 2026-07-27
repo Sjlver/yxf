@@ -1,0 +1,1364 @@
+survey:
+- '#': A comment about fruit.
+- type: begin_group
+  name: grp_apple
+  label: How many pieces of fruit did you eat yesterday?
+- type: start
+  name: start
+- type: end
+  name: end
+- type: deviceid
+  name: deviceid
+- type: phonenumber
+  name: devicephonenum
+- type: username
+  name: username
+- type: text audit
+  name: text_audit
+  appearance: p=100;eventlog
+- type: audio audit
+  name: audio_audit
+  appearance: p=100;s=note_fig;d=note_tangerine
+- type: calculate
+  name: calc_apple
+  calculation: once(now())
+- type: calculate
+  name: calc_banana
+  calculation: pulldata('apple', 'calc_banana', 'username', ${username})
+- type: begin group
+  name: grp_banana
+  label: Was any fruit left over at the end of the day?
+- type: begin group
+  name: grp_cherry
+  label: Which fruit keeps the longest in your kitchen?
+  appearance: field-list
+- type: select_one grape_list
+  name: sel_apple
+  label: How often do you eat fruit in a normal week?
+  hint: Enter a whole number of pieces.
+  required: yes
+- type: text
+  name: txt_apple
+  label: Did you plant any new fruit trees this season?
+  hint: Do not count fruit that has already spoiled.
+- type: end_group
+  name: grp_cherry
+- type: select_one apple_list
+  name: sel_banana
+  label: How many people in this house like citrus fruit?
+  hint: Read the whole list out loud before answering.
+  required: yes
+  appearance: search('banana', 'cherry', 'date, elderberry', ${txt_apple}, 'fig',
+    ${sel_apple})
+- type: calculate
+  name: calc_cherry
+  calculation: pulldata('banana', 'date', 'sel_banana', ${sel_banana})
+- type: calculate
+  name: calc_date
+  calculation: pulldata('banana', 'grape', 'sel_banana', ${sel_banana})
+- type: calculate
+  name: calc_elderberry
+  calculation: pulldata('banana', 'honeydew', 'sel_banana', ${sel_banana})
+- type: calculate
+  name: calc_fig
+  calculation: pulldata('banana', 'fig', 'sel_banana', ${sel_banana})
+- type: calculate
+  name: calc_grape
+  calculation: pulldata('banana', 'kiwi', 'sel_banana', ${sel_banana})
+- type: calculate
+  name: calc_honeydew
+  calculation: pulldata('banana', 'lemon', 'sel_banana', ${sel_banana})
+- type: begin_group
+  name: grp_date
+  label: Do you prefer sweet or sour fruit?
+  appearance: field-list
+- type: note
+  name: note_apple
+  label: |-
+    <div style="font-size:24px; font-weight:bold; color:#006400; text-align:center;">Thank you for telling us about your fruit.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Please hand the tablet back to the interviewer.</b>This section is about the fruit you eat at home.<br/>
+    <b>Take a moment before the next basket of questions.</b>Remember that every answer stays confidential.<br/>
+    <b>Thank you for telling us about your fruit.</b>Please hand the tablet back to the interviewer.</div>
+    <br>
+    <div style="font-size:32px; font-weight:bold; color:#133c99; text-align:center; letter-spacing:2px;">This section is about the fruit you eat at home.</div>
+- type: end group
+  name: grp_date
+- type: calculate
+  name: calc_kiwi
+  calculation: if(${calc_honeydew} = 'mango', 1, 0)
+- type: end group
+  name: grp_banana
+- type: note
+  name: note_banana
+  label: Please hand the tablet back to the interviewer.
+  hint: Any kind of fruit counts, fresh or dried.
+- type: end_group
+  name: grp_apple
+- type: begin_group
+  name: grp_elderberry
+  label: Which fruit did you last share with a neighbour?
+  relevant: ${calc_kiwi} = 0
+- type: begin group
+  name: grp_fig
+  label: Would you like to taste a new kind of fruit?
+  appearance: field-list
+- type: note
+  name: note_cherry
+  label: This section is about the fruit you eat at home.<b>Take a moment before the
+    next basket of questions.</b>Remember that every answer stays confidential.
+  label::Wolof (wo): Jërëjëf ci say tontu.<div style="font-size:12px; color:#4D4D4D;">Jox
+    tablet bi ci enquêteur bi.</div>
+  label::Fula (ff): A jaaraama e jaabawol maa.<div style="font-size:12px; color:#4D4D4D;">Rutt
+    tablet nden e lanndotooɗo on.</div>
+  label::Mandinka (mnk): I ning baraka i la jaabiroo la.<div style="font-size:12px;
+    color:#4D4D4D;">Tablet be murundi ñininnaa ma.</div>
+  hint: Do not count fruit that has already spoiled.
+- type: select_one banana_list
+  name: sel_cherry
+  label: How many baskets did you fill this morning?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  required: yes
+- type: end group
+  name: grp_fig
+- type: begin_group
+  name: grp_grape
+  label: Which fruit keeps the longest in your kitchen?
+  relevant: ${sel_cherry} = 'no'
+  appearance: field-list
+- type: note
+  name: note_date
+  label: |-
+    <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">Take a moment before the next basket of questions.</div>
+    <br>
+
+    <div style="font-size:18px;">Remember that every answer stays confidential.</div>
+- type: end_group
+  name: grp_grape
+- type: calculate_here
+  name: calc_lemon
+  calculation: once(format-date-time(now(), '%Y-%b-%e %H:%M:%S'))
+- type: end group
+  name: grp_elderberry
+- type: begin group
+  name: grp_honeydew
+  label: How many people in this house like citrus fruit?
+  relevant: ${sel_cherry} = 'yes'
+  appearance: field-list
+- type: geopoint
+  name: geo_apple
+  label: Is there a fruit you have never tried?
+  hint: Enter a whole number of pieces.
+  required: yes
+- type: end_group
+  name: grp_honeydew
+- type: begin_group
+  name: grp_kiwi
+  label: How far is the nearest fruit stall?
+  relevant: ${sel_cherry}='yes'
+- type: note
+  name: note_elderberry
+  label: |-
+    <div style="font-size:18px;">
+    <b>Remember that every answer stays confidential.</b><br>Thank you for telling us about your fruit.</div>
+  label::Wolof (wo): |-
+    <div style="font-size:18px;">
+    <b>Jërëjëf ci say tontu.</b><br>Jox tablet bi ci enquêteur bi.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Jërëjëf ci say tontu.</div>
+  label::Fula (ff): |-
+    <div style="font-size:18px;">
+    <b>A jaaraama e jaabawol maa.</b><br>Rutt tablet nden e lanndotooɗo on.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">A jaaraama e jaabawol maa.</div>
+  label::Mandinka (mnk): |-
+    <div style="font-size:18px;">
+    <b>I ning baraka i la jaabiroo la.</b><br>Tablet be murundi ñininnaa ma.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">I ning baraka i la jaabiroo la.</div>
+- type: calculate
+  name: calc_mango
+  calculation: if(${calc_date} != '', int(${calc_date}), if(${calc_elderberry} !=
+    '', int((today() - date(${calc_elderberry})) div 365.25), ''))
+- type: begin group
+  name: grp_lemon
+  label: How many pieces of fruit did you eat yesterday?
+  appearance: field-list
+- type: note
+  name: note_fig
+  label: |-
+    <div style="font-size:18px;">
+    <b>Thank you for telling us about your fruit.</b>Please hand the tablet back to the interviewer.</div>
+  relevant: ${calc_mango} != ''
+- type: select_one banana_list
+  name: sel_date
+  label: Which fruit grows in your garden?
+  hint: If you are not sure, give your best estimate.
+  required: yes
+  relevant: ${calc_mango} != ''
+- type: end group
+  name: grp_lemon
+- type: integer
+  name: num_apple
+  label: How many fruit trees are on this plot?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Ask the person who does the shopping.
+  required: yes
+  relevant: ${calc_mango} = '' or ${sel_date} = 'no'
+  constraint: . >= 10 and . <= 60
+  constraint_message: That is more fruit than we expected. Please check the number.
+- type: calculate
+  name: calc_nectarine
+  calculation: if(${num_apple} != '' and ${calc_mango} != '', if(${num_apple} < ${calc_mango},
+    ${num_apple}, ${calc_mango}), if(${num_apple} != '', ${num_apple}, ${calc_mango}))
+- type: calculate
+  name: calc_orange
+  calculation: if(${calc_nectarine} != '' and ${calc_nectarine} >= 18, 1, 0)
+- type: begin_group
+  name: grp_mango
+  label: How much does a kilo of fruit cost here?
+  relevant: ${calc_orange} = 0
+- type: note
+  name: note_grape
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">Please
+    hand the tablet back to the interviewer.</div>
+- type: end_group
+  name: grp_mango
+- type: begin group
+  name: grp_nectarine
+  label: Would you like to taste a new kind of fruit?
+  relevant: ${calc_orange} = 1
+- type: integer
+  name: num_banana
+  label: How many baskets did you fill this morning?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: If you are not sure, give your best estimate.
+  required: yes
+  constraint: . >= 0 and . <= 60
+- type: end group
+  name: grp_nectarine
+- type: calculate
+  name: calc_papaya
+  calculation: if(${calc_grape} != '', int(today() - date(${calc_grape})), '')
+- type: calculate
+  name: calc_quince
+  calculation: if(${calc_papaya} != '', ${calc_papaya}, ${num_banana})
+- type: calculate
+  name: calc_raspberry
+  calculation: if(${calc_quince} != '' and ${calc_quince} >= 0 and ${calc_quince}
+    <= 28, 1, 0)
+- type: begin_group
+  name: grp_orange
+  label: Which fruit is hardest to find at the market?
+  relevant: ${calc_orange} = 1 and ${calc_raspberry} = 0
+- type: note
+  name: note_honeydew
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">This
+    section is about the fruit you eat at home.</div>
+- type: end_group
+  name: grp_orange
+- type: begin group
+  name: grp_papaya
+  label: Is there a fruit you have never tried?
+  relevant: ${calc_raspberry} = 1
+- type: select_one elderberry_list
+  name: sel_elderberry
+  label: Which fruit do the children ask for most?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  hint: If you are not sure, give your best estimate.
+  required: yes
+- type: end group
+  name: grp_papaya
+- type: begin_group
+  name: grp_quince
+  label: What is your favorite fruit?
+  relevant: ${sel_elderberry} = 'nectarine'
+- type: note
+  name: note_kiwi
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">Take
+    a moment before the next basket of questions.</div>
+- type: end_group
+  name: grp_quince
+- type: begin group
+  name: grp_raspberry
+  label: Which fruit grows in your garden?
+  relevant: ${sel_elderberry} = 'orange'
+- type: select_one banana_list
+  name: sel_fig
+  label: Do you prefer sweet or sour fruit?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Select all the fruit that applies.
+  required: yes
+- type: end group
+  name: grp_raspberry
+- type: begin_group
+  name: grp_strawberry
+  label: Is the fruit ripe today?
+  relevant: ${sel_fig} = 'no'
+- type: note
+  name: note_lemon
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">Remember
+    that every answer stays confidential.</div>
+- type: end_group
+  name: grp_strawberry
+- type: begin group
+  name: grp_tangerine
+  label: How much does a kilo of fruit cost here?
+  relevant: ${sel_fig} = 'yes'
+- type: select_one fig_list
+  name: sel_grape
+  label: Which fruit did you last share with a neighbour?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Ask the person who does the shopping.
+  required: yes
+- type: end group
+  name: grp_tangerine
+- type: begin_group
+  name: grp_ugli
+  label: How many baskets did you fill this morning?
+  relevant: ${sel_grape} = 'other'
+- type: note
+  name: note_mango
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">Thank
+    you for telling us about your fruit.</div>
+- type: end_group
+  name: grp_ugli
+- type: begin group
+  name: grp_vanilla
+  label: Which fruit keeps the longest in your kitchen?
+  relevant: ${sel_grape} = 'papaya'
+- type: select_one banana_list
+  name: sel_honeydew
+  label: How often do you eat fruit in a normal week?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  hint: Count only fruit that is ripe enough to eat.
+  required: yes
+- type: end group
+  name: grp_vanilla
+- type: begin_group
+  name: grp_watermelon
+  label: Which fruit is hardest to find at the market?
+  relevant: ${sel_honeydew} = 'yes'
+- type: note
+  name: note_nectarine
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">Please
+    hand the tablet back to the interviewer.</div>
+- type: end_group
+  name: grp_watermelon
+- type: begin group
+  name: grp_apricot
+  label: Is there a fruit you have never tried?
+  relevant: ${sel_honeydew} = 'no'
+- type: select_one banana_list
+  name: sel_kiwi
+  label: Which fruit do the children ask for most?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Do not count fruit that has already spoiled.
+  required: yes
+- type: end group
+  name: grp_apricot
+- type: begin_group
+  name: grp_blueberry
+  label: What is your favorite fruit?
+  relevant: ${sel_kiwi} = 'no'
+- type: note
+  name: note_orange
+  label: <div style="font-size:24px; font-weight:bold; color:#8B0000; text-align:center;">This
+    section is about the fruit you eat at home.</div>
+- type: end_group
+  name: grp_blueberry
+- type: note
+  name: note_papaya
+  label: |-
+    <div style="font-size:20px; color:#8B0000; font-weight:bold; text-align:center;">Take a moment before the next basket of questions.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Remember that every answer stays confidential.</b><br>Thank you for telling us about your fruit.</div>
+  label::Wolof (wo): |-
+    <div style="font-size:20px; color:#8B0000; font-weight:bold; text-align:center;">Jox tablet bi ci enquêteur bi.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Jërëjëf ci say tontu.</b><br>Jox tablet bi ci enquêteur bi.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Jërëjëf ci say tontu.</div>
+  label::Fula (ff): |-
+    <div style="font-size:20px; color:#8B0000; font-weight:bold; text-align:center;">Rutt tablet nden e lanndotooɗo on.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>A jaaraama e jaabawol maa.</b><br>Rutt tablet nden e lanndotooɗo on.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">A jaaraama e jaabawol maa.</div>
+  label::Mandinka (mnk): |-
+    <div style="font-size:20px; color:#8B0000; font-weight:bold; text-align:center;">Tablet be murundi ñininnaa ma.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>I ning baraka i la jaabiroo la.</b><br>Tablet be murundi ñininnaa ma.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">I ning baraka i la jaabiroo la.</div>
+  relevant: ${calc_tangerine} = 0
+- type: end group
+  name: grp_kiwi
+- type: calculate
+  name: calc_strawberry
+  calculation: if(${calc_kiwi} = 1, 'quince', if(${sel_cherry} != 'yes', 'raspberry',
+    if(${calc_orange} = 0, 'strawberry', if(${calc_raspberry} = 0, 'tangerine', if(${sel_elderberry}
+    = 'nectarine', 'ugli', if(${sel_fig} = 'no', 'vanilla', if(${sel_grape} = 'other',
+    'watermelon', if(${sel_honeydew} = 'yes', 'apricot', if(${sel_kiwi} = 'no', 'blueberry',
+    'calc_tangerine')))))))))
+- type: calculate
+  name: calc_tangerine
+  calculation: if(${calc_strawberry} = 'calc_tangerine', 1, 0)
+- type: begin group
+  name: grp_cranberry
+  label: Is the fruit ripe today?
+  relevant: ${calc_tangerine} = 1
+- type: note
+  name: note_quince
+  label: |-
+    <div style="font-size:24px; font-weight:bold; color:#006400; text-align:center;">Remember that every answer stays confidential.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Thank you for telling us about your fruit.</b><br>Please hand the tablet back to the interviewer.</div>
+  label::Wolof (wo): |-
+    <div style="font-size:24px; font-weight:bold; color:#006400; text-align:center;">Jërëjëf ci say tontu.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Jox tablet bi ci enquêteur bi.</b><br>Jërëjëf ci say tontu.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Jox tablet bi ci enquêteur bi.</div>
+  label::Fula (ff): |-
+    <div style="font-size:24px; font-weight:bold; color:#006400; text-align:center;">A jaaraama e jaabawol maa.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Rutt tablet nden e lanndotooɗo on.</b><br>A jaaraama e jaabawol maa.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Rutt tablet nden e lanndotooɗo on.</div>
+  label::Mandinka (mnk): |-
+    <div style="font-size:24px; font-weight:bold; color:#006400; text-align:center;">I ning baraka i la jaabiroo la.</div>
+    <br>
+    <div style="font-size:18px;">
+    <b>Tablet be murundi ñininnaa ma.</b><br>I ning baraka i la jaabiroo la.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Tablet be murundi ñininnaa ma.</div>
+- type: begin_group
+  name: grp_damson
+  label: Where do you usually buy your fruit?
+  appearance: field-list
+- type: select_one lemon_list
+  name: sel_lemon
+  label: How much does a kilo of fruit cost here?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Select all the fruit that applies.
+  required: yes
+- type: end_group
+  name: grp_damson
+- type: select_multiple honeydew_list
+  name: sel_mango
+  label: Would you like to taste a new kind of fruit?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Count only fruit that is ripe enough to eat.
+  required: yes
+- type: select_one cherry_list
+  name: sel_nectarine
+  label: How many baskets did you fill this morning?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  required: yes
+- type: begin group
+  name: grp_guava
+  label: Was any fruit left over at the end of the day?
+  relevant: ${sel_nectarine} = 'yes'
+  appearance: field-list
+- type: select_one mango_list
+  name: sel_orange
+  label: Which fruit keeps the longest in your kitchen?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Ask the person who does the shopping.
+  required: yes
+- type: end group
+  name: grp_guava
+- type: select_one cherry_list
+  name: sel_papaya
+  label: Did you plant any new fruit trees this season?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  required: yes
+- type: begin_group
+  name: grp_jackfruit
+  label: Which fruit is hardest to find at the market?
+  relevant: ${sel_papaya} = 'yes'
+- type: select_one cherry_list
+  name: sel_quince
+  label: How many people in this house like citrus fruit?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  required: yes
+- type: end_group
+  name: grp_jackfruit
+- type: begin group
+  name: grp_lime
+  label: Which fruit do the children ask for most?
+  relevant: ${sel_quince} = 'yes'
+  appearance: field-list
+- type: select_one mango_list
+  name: sel_raspberry
+  label: How far is the nearest fruit stall?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Any kind of fruit counts, fresh or dried.
+  required: yes
+- type: end group
+  name: grp_lime
+- type: select_one raspberry_list
+  name: sel_strawberry
+  label: How many pieces of fruit did you eat yesterday?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Enter a whole number of pieces.
+  required: yes
+  relevant: ${sel_quince} = 'yes'
+- type: begin_group
+  name: grp_melon
+  label: Which fruit grows in your garden?
+  appearance: field-list
+- type: select_one nectarine_list
+  name: sel_tangerine
+  label: Do you prefer sweet or sour fruit?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  hint: Select all the fruit that applies.
+  required: yes
+- type: end_group
+  name: grp_melon
+- type: select_one cherry_list
+  name: sel_ugli
+  label: Is the fruit ripe today?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  required: yes
+  relevant: ${sel_tangerine} != 'cranberry'
+- type: select_one cherry_list
+  name: sel_vanilla
+  label: Where do you usually buy your fruit?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  required: yes
+- type: begin group
+  name: grp_olive
+  label: How much does a kilo of fruit cost here?
+  relevant: ${sel_vanilla} = 'yes'
+  appearance: field-list
+- type: select_one mango_list
+  name: sel_watermelon
+  label: Which fruit did you last share with a neighbour?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Ask the person who does the shopping.
+  required: yes
+- type: end group
+  name: grp_olive
+- type: select_one strawberry_list
+  name: sel_apricot
+  label: How many baskets did you fill this morning?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  required: yes
+- type: select_one cherry_list
+  name: sel_blueberry
+  label: Was any fruit left over at the end of the day?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Select all the fruit that applies.
+  required: yes
+- type: begin_group
+  name: grp_peach
+  label: Which fruit keeps the longest in your kitchen?
+  relevant: ${sel_blueberry} = 'yes'
+  appearance: field-list
+- type: decimal
+  name: num_cherry
+  label: How often do you eat fruit in a normal week?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Count only fruit that is ripe enough to eat.
+  required: yes
+  constraint: . > 0 and . < 10
+  constraint_message: Please enter a number between 0 and 99 pieces of fruit.
+- type: end_group
+  name: grp_peach
+- type: select_one melon_list
+  name: sel_cranberry
+  label: <div style="font-size:20px; font-weight:bold;">Which fruit is hardest to
+    find at the market?</div>How many people in this house like citrus fruit?
+  hint: Any kind of fruit counts, fresh or dried.
+  required: yes
+  relevant: ${num_cherry} < 2 or ${num_cherry} > 5
+  constraint: . = 'damson'
+  constraint_message: Please choose one of the fruits in the list.
+- type: select_one cherry_list
+  name: sel_damson
+  label: How many people in this house like citrus fruit?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Ask the person who does the shopping.
+  required: yes
+- type: begin group
+  name: grp_pear
+  label: Is there a fruit you have never tried?
+  relevant: ${sel_damson} = 'yes'
+- type: select_multiple tangerine_list
+  name: sel_guava
+  label: Which fruit do the children ask for most?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  hint: Do not count fruit that has already spoiled.
+  required: yes
+- type: end group
+  name: grp_pear
+- type: begin_group
+  name: grp_plum
+  label: What is your favorite fruit?
+  appearance: field-list
+- type: select_one lemon_list
+  name: sel_jackfruit
+  label: How many pieces of fruit did you eat yesterday?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  hint: Count only fruit that is ripe enough to eat.
+  required: yes
+- type: integer
+  name: num_date
+  label: Which fruit grows in your garden?
+  hint: If you are not sure, give your best estimate.
+  required: ${sel_jackfruit}='guava' or ${sel_jackfruit}='jackfruit'
+  constraint: (${sel_jackfruit}='guava' and . >= 0 and . <= 23) or (${sel_jackfruit}='jackfruit'
+    and . >= 1 and . <= 28)
+  constraint_message: This answer does not match the earlier fruit count.
+- type: end_group
+  name: grp_plum
+- type: begin group
+  name: grp_pomegranate
+  label: How many fruit trees are on this plot?
+  relevant: not(${sel_jackfruit}='guava' and ${num_date}=0)
+  appearance: field-list
+- type: select_one orange_list
+  name: sel_lime
+  label: Is the fruit ripe today?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Enter a whole number of pieces.
+  required: yes
+- type: end group
+  name: grp_pomegranate
+- type: select_one ugli_list
+  name: sel_melon
+  label: How much does a kilo of fruit cost here?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  required: yes
+  appearance: horizontal
+- type: begin_group
+  name: grp_rhubarb
+  label: Which fruit did you last share with a neighbour?
+  appearance: field-list
+- type: select_one papaya_list
+  name: sel_olive
+  label: Would you like to taste a new kind of fruit?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Count only fruit that is ripe enough to eat.
+  required: yes
+- type: integer
+  name: num_elderberry
+  label: How many baskets did you fill this morning?
+  hint: If you are not sure, give your best estimate.
+  required: ${sel_olive}='lime' or ${sel_olive}='melon'
+  constraint: (${sel_olive}='lime' and . >= 22 and . <= 52) or (${sel_olive}='melon'
+    and . >= 5 and . <= 12)
+  constraint_message: This answer does not match the earlier fruit count.
+- type: end_group
+  name: grp_rhubarb
+- type: calculate
+  name: calc_ugli
+  calculation: if(${sel_olive}='lime', ${num_elderberry}, if(${sel_olive}='melon',
+    int(round(${num_elderberry} * 4.345, 0)), ''))
+- type: select_one banana_list
+  name: sel_peach
+  label: How often do you eat fruit in a normal week?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  required: yes
+- type: begin group
+  name: grp_satsuma
+  label: Did you plant any new fruit trees this season?
+  relevant: ${sel_peach} = 'yes'
+- type: select_multiple honeydew_list
+  name: sel_pear
+  label: Which fruit is hardest to find at the market?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Select all the fruit that applies.
+  required: yes
+- type: begin group
+  name: grp_lychee
+  label: How many people in this house like citrus fruit?
+  appearance: field-list
+- type: select_one papaya_list
+  name: sel_plum
+  label: Is there a fruit you have never tried?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  hint: Count only fruit that is ripe enough to eat.
+  required: yes
+- type: integer
+  name: num_fig
+  label: Which fruit do the children ask for most?
+  hint: If you are not sure, give your best estimate.
+  required: ${sel_plum}='lime' or ${sel_plum}='melon'
+  constraint: (${sel_plum}='lime' and . >= 1 and . <= 43) or (${sel_plum}='melon'
+    and . >= 1 and . <= 10)
+  constraint_message: This answer does not match the earlier fruit count.
+- type: end_group
+  name: grp_lychee
+- type: calculate
+  name: calc_vanilla
+  calculation: if(${sel_plum}='lime', ${num_fig}, if(${sel_plum}='melon', int(round(${num_fig}
+    * 4.345, 0)), ''))
+- type: begin_group
+  name: grp_avocado
+  label: How many pieces of fruit did you eat yesterday?
+  appearance: field-list
+- type: select_one quince_list
+  name: sel_pomegranate
+  label: Which fruit grows in your garden?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  hint: Do not count fruit that has already spoiled.
+  required: yes
+- type: end group
+  name: grp_avocado
+- type: end group
+  name: grp_satsuma
+- type: begin_group
+  name: grp_coconut
+  label: Is the fruit ripe today?
+- type: begin_group
+  name: grp_durian
+  appearance: field-list
+- type: select_one quince_list
+  name: sel_rhubarb
+  label: How much does a kilo of fruit cost here?
+  label::Wolof (wo): Ban doom garab nga gën a bëgg?<div style="font-size:12px; color:#4D4D4D;">Ñaata
+    doom garab nga lekk démb?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal ngal mbeleɗaa?<div style="font-size:12px; color:#4D4D4D;">Ɓiɗɗe
+    leggal no foti nyaamɗaa hanki?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka diyaa i ye?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jelu le domota i la kunuŋ?</div>
+  hint: Any kind of fruit counts, fresh or dried.
+  required: yes
+- type: integer
+  name: num_grape
+  label: Which fruit did you last share with a neighbour?
+  hint: Ask the person who does the shopping.
+  required: ${sel_rhubarb}='olive'
+  constraint: ${sel_rhubarb}='olive' and . >= 1 and . < 40
+  constraint_message: That is more fruit than we expected. Please check the number.
+- type: end group
+  name: grp_durian
+- type: select_one melon_list
+  name: sel_satsuma
+  label: <div style="font-size:20px; font-weight:bold;">How many baskets did you fill
+    this morning?</div>Was any fruit left over at the end of the day?
+  hint: Do not count fruit that has already spoiled.
+  required: yes
+  relevant: ${num_grape} > 10
+  constraint: . = 'damson'
+  constraint_message: This answer does not match the earlier fruit count.
+- type: end group
+  name: grp_coconut
+- type: select_one banana_list
+  name: sel_lychee
+  label: Which fruit keeps the longest in your kitchen?
+  label::Wolof (wo): Ban doom garab a sax ci sa tool?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab nga gën a bëgg?</div>
+  label::Fula (ff): Hol ɓiɗɗo leggal fuɗata e ngesa maa?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal ngal mbeleɗaa?</div>
+  label::Mandinka (mnk): Yiridiŋ jumaa le ka faliŋ i la kunkoo to?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka diyaa i ye?</div>
+  required: yes
+- type: begin_group
+  name: grp_gooseberry
+  label: How often do you eat fruit in a normal week?
+  appearance: field-list
+- type: note
+  name: note_raspberry
+  label: Thank you for telling us about your fruit.
+  label::Wolof (wo): Jox tablet bi ci enquêteur bi.<div style="font-size:12px; color:#4D4D4D;">Jërëjëf
+    ci say tontu.</div>
+  label::Fula (ff): Rutt tablet nden e lanndotooɗo on.<div style="font-size:12px;
+    color:#4D4D4D;">A jaaraama e jaabawol maa.</div>
+  label::Mandinka (mnk): Tablet be murundi ñininnaa ma.<div style="font-size:12px;
+    color:#4D4D4D;">I ning baraka i la jaabiroo la.</div>
+  hint: If you are not sure, give your best estimate.
+- type: select_one lime_list
+  name: sel_avocado
+  label: Did you plant any new fruit trees this season?
+  hint: If you are not sure, give your best estimate.
+  required: yes
+- type: end_group
+  name: grp_gooseberry
+- type: begin group
+  name: grp_persimmon
+  label: How many people in this house like citrus fruit?
+  relevant: ${sel_avocado}='yes'
+  appearance: field-list
+- type: integer
+  name: num_honeydew
+  label: Is there a fruit you have never tried?
+  label::Wolof (wo): Ñaata doom garab nga lekk démb?<div style="font-size:12px; color:#4D4D4D;">Ban
+    doom garab a sax ci sa tool?</div>
+  label::Fula (ff): Ɓiɗɗe leggal no foti nyaamɗaa hanki?<div style="font-size:12px;
+    color:#4D4D4D;">Hol ɓiɗɗo leggal fuɗata e ngesa maa?</div>
+  label::Mandinka (mnk): Yiridiŋ jelu le domota i la kunuŋ?<div style="font-size:12px;
+    color:#4D4D4D;">Yiridiŋ jumaa le ka faliŋ i la kunkoo to?</div>
+  required: yes
+  constraint: . >= 0
+  constraint_message: Please enter a number between 0 and 99 pieces of fruit.
+- type: end group
+  name: grp_persimmon
+- type: begin_group
+  name: grp_clementine
+  label: How far is the nearest fruit stall?
+  appearance: field-list
+- type: note
+  name: note_strawberry
+  label: Please hand the tablet back to the interviewer.
+- type: end_group
+  name: grp_clementine
+- type: note
+  name: note_tangerine
+  label: |-
+    <div style="font-size:18px;">
+    <b>This section is about the fruit you eat at home.</b><br>Take a moment before the next basket of questions.</div>
+  label::Wolof (wo): |-
+    <div style="font-size:18px;">
+    <b>Jox tablet bi ci enquêteur bi.</b><br>Jërëjëf ci say tontu.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Jox tablet bi ci enquêteur bi.</div>
+  label::Fula (ff): |-
+    <div style="font-size:18px;">
+    <b>Rutt tablet nden e lanndotooɗo on.</b><br>A jaaraama e jaabawol maa.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Rutt tablet nden e lanndotooɗo on.</div>
+  label::Mandinka (mnk): |-
+    <div style="font-size:18px;">
+    <b>Tablet be murundi ñininnaa ma.</b><br>I ning baraka i la jaabiroo la.</div>
+
+    <div style="font-size:12px; color:#4D4D4D;">Tablet be murundi ñininnaa ma.</div>
+- type: begin group
+  name: grp_blackberry
+  label: How many pieces of fruit did you eat yesterday?
+- type: note
+  name: note_ugli
+  label: |-
+    <div style="font-size:22px; font-weight:bold; text-align:center;">Take a moment before the next basket of questions.</div>
+    <br>
+    <div style="font-size:18px; text-align:center;">Remember that every answer stays confidential.</div>
+- type: select_one banana_list
+  name: sel_coconut
+  label: Which fruit grows in your garden?
+  hint: If you are not sure, give your best estimate.
+  required: yes
+- type: begin group
+  name: grp_passionfruit
+  label: Do you prefer sweet or sour fruit?
+  relevant: ${sel_coconut} = 'yes'
+- type: integer
+  name: num_kiwi
+  label: How many fruit trees are on this plot?
+  hint: Ask the person who does the shopping.
+  required: yes
+  constraint: . >= 1
+  constraint_message: That is more fruit than we expected. Please check the number.
+- type: end_group
+  name: grp_passionfruit
+- type: select_one banana_list
+  name: sel_durian
+  label: Where do you usually buy your fruit?
+  required: yes
+- type: begin_group
+  name: grp_starfruit
+  label: How much does a kilo of fruit cost here?
+  relevant: ${sel_durian} = 'yes'
+- type: select_one blueberry_list
+  name: sel_gooseberry
+  label: Which fruit did you last share with a neighbour?
+  required: yes
+- type: end group
+  name: grp_starfruit
+- type: end group
+  name: grp_blackberry
+- type: calculate_here
+  name: calc_watermelon
+  calculation: once(format-date-time(now(), '%Y-%b-%e %H:%M:%S'))
+- type: begin_group
+  name: grp_mulberry
+  label: Which fruit keeps the longest in your kitchen?
+  appearance: field-list
+- type: text
+  name: txt_banana
+  label: How often do you eat fruit in a normal week?
+  hint: Enter a whole number of pieces.
+- type: select_one jackfruit_list
+  name: sel_persimmon
+  label: Did you plant any new fruit trees this season?
+  required: yes
+- type: end_group
+  name: grp_mulberry
+- type: text
+  name: txt_cherry
+  label: How many people in this house like citrus fruit?
+  required: yes
+  relevant: ${sel_persimmon} = 'other'
+- type: end group
+  name: grp_cranberry
+- type: begin group
+  name: grp_loquat
+  label: Which fruit do the children ask for most?
+- type: select_one olive_list
+  name: sel_clementine
+  label: How far is the nearest fruit stall?
+  hint: Any kind of fruit counts, fresh or dried.
+  required: yes
+  calculation: if(${calc_strawberry} = 'quince', 'peach', if(${sel_cherry} = 'no',
+    'refused', if(${calc_strawberry} = 'strawberry', 'pear', if(${calc_strawberry}
+    = 'tangerine', 'plum', if(${calc_strawberry} = 'ugli', 'pomegranate', if(${calc_strawberry}
+    = 'vanilla', 'rhubarb', if(${calc_strawberry} = 'watermelon', 'satsuma', if(${calc_strawberry}
+    = 'apricot', 'lychee', if(${calc_strawberry} = 'blueberry', 'avocado', if(${calc_tangerine}
+    = 1, 'coconut', ''))))))))))
+- type: end_group
+  name: grp_loquat
+choices:
+- list_name: apple_list
+  name: sel_banana
+  label: Apple
+- list_name: banana_list
+  name: yes
+  label: Apple
+- list_name: banana_list
+  name: no
+  label: Banana
+- list_name: cherry_list
+  name: yes
+  label: Apple
+- list_name: cherry_list
+  name: no
+  label: Banana
+- list_name: cherry_list
+  name: dk
+  label: Cherry
+- list_name: date_list
+  name: yes
+  label: Apple
+- list_name: date_list
+  name: no
+  label: Banana
+- list_name: date_list
+  name: dk
+  label: Cherry
+- list_name: elderberry_list
+  name: orange
+  label: Apple
+- list_name: elderberry_list
+  name: nectarine
+  label: Banana
+- list_name: fig_list
+  name: papaya
+  label: Apple
+- list_name: fig_list
+  name: other
+  label: Banana
+- list_name: grape_list
+  name: durian
+  label: Apple
+- list_name: grape_list
+  name: gooseberry
+  label: Banana
+- list_name: grape_list
+  name: persimmon
+  label: Cherry
+- list_name: honeydew_list
+  name: clementine
+  label: Apple
+- list_name: honeydew_list
+  name: blackberry
+  label: Banana
+- list_name: honeydew_list
+  name: passionfruit
+  label: Cherry
+- list_name: kiwi_list
+  name: starfruit
+  label: Apple
+- list_name: kiwi_list
+  name: mulberry
+  label: Banana
+- list_name: kiwi_list
+  name: loquat
+  label: Cherry
+- list_name: lemon_list
+  name: guava
+  label: Apple
+- list_name: lemon_list
+  name: jackfruit
+  label: Banana
+- list_name: lemon_list
+  name: dk
+  label: Cherry
+- list_name: mango_list
+  name: medlar
+  label: Apple
+- list_name: mango_list
+  name: guava
+  label: Banana
+- list_name: mango_list
+  name: jackfruit
+  label: Cherry
+- list_name: nectarine_list
+  name: medlar
+  label: Apple
+- list_name: nectarine_list
+  name: guava
+  label: Banana
+- list_name: nectarine_list
+  name: jackfruit
+  label: Cherry
+- list_name: orange_list
+  name: none
+  label: Apple
+- list_name: orange_list
+  name: sloe
+  label: Banana
+- list_name: orange_list
+  name: dk
+  label: Cherry
+- list_name: papaya_list
+  name: lime
+  label: Apple
+- list_name: papaya_list
+  name: melon
+  label: Banana
+- list_name: papaya_list
+  name: dk
+  label: Cherry
+- list_name: quince_list
+  name: olive
+  label: Apple
+- list_name: quince_list
+  name: dk
+  label: Banana
+- list_name: raspberry_list
+  name: apple_1
+  label: Apple
+- list_name: raspberry_list
+  name: 10-29
+  label: Banana
+- list_name: raspberry_list
+  name: 30-59
+  label: Cherry
+- list_name: strawberry_list
+  name: banana_1
+  label: Apple
+- list_name: strawberry_list
+  name: cherry_1
+  label: Banana
+- list_name: strawberry_list
+  name: date_1
+  label: Cherry
+- list_name: tangerine_list
+  name: elderberry_1
+  label: Apple
+- list_name: tangerine_list
+  name: fig_1
+  label: Banana
+- list_name: tangerine_list
+  name: grape_1
+  label: Cherry
+- list_name: ugli_list
+  name: honeydew_1
+  label: Apple
+- list_name: ugli_list
+  name: kiwi_1
+  label: Banana
+- list_name: ugli_list
+  name: lemon_1
+  label: Cherry
+- list_name: vanilla_list
+  name: mango_1
+  label: Apple
+- list_name: vanilla_list
+  name: nectarine_1
+  label: Banana
+- list_name: watermelon_list
+  name: none
+  label: Apple
+- list_name: watermelon_list
+  name: orange_1
+  label: Banana
+- list_name: watermelon_list
+  name: papaya_1
+  label: Cherry
+- list_name: apricot_list
+  name: quince_1
+  label: Apple
+- list_name: apricot_list
+  name: raspberry_1
+  label: Banana
+- list_name: apricot_list
+  name: strawberry_1
+  label: Cherry
+- list_name: blueberry_list
+  name: tangerine_1
+  label: Apple
+- list_name: blueberry_list
+  name: ugli_1
+  label: Banana
+- list_name: blueberry_list
+  name: vanilla_1
+  label: Cherry
+- list_name: cranberry_list
+  name: watermelon_1
+  label: Apple
+- list_name: cranberry_list
+  name: apricot_1
+  label: Banana
+- list_name: cranberry_list
+  name: blueberry_1
+  label: Cherry
+- list_name: damson_list
+  name: cranberry_1
+  label: Apple
+- list_name: damson_list
+  name: damson_1
+  label: Banana
+- list_name: damson_list
+  name: guava_1
+  label: Cherry
+- list_name: guava_list
+  name: jackfruit_1
+  label: Apple
+- list_name: guava_list
+  name: lime_1
+  label: Banana
+- list_name: guava_list
+  name: melon_1
+  label: Cherry
+- list_name: jackfruit_list
+  name: olive_1
+  label: Apple
+- list_name: jackfruit_list
+  name: peach_1
+  label: Banana
+- list_name: jackfruit_list
+  name: pear_1
+  label: Cherry
+- list_name: lime_list
+  name: yes
+  label: Apple
+- list_name: lime_list
+  name: dk
+  label: Banana
+- list_name: melon_list
+  name: damson
+  label: Apple
+- list_name: melon_list
+  name: plum_1
+  label: Banana
+- list_name: olive_list
+  name: coconut
+  label: Apple
+- list_name: olive_list
+  name: pear
+  label: Banana
+- list_name: olive_list
+  name: plum
+  label: Cherry
+settings:
+- form_title: Favorite Fruit Survey
+  form_id: favorite_fruit_html
+  version: 20260725
+  default_language: English
+  style: pages
+  instance_name: concat(${sel_banana}, 'pomegranate_1', ${calc_cherry}, 'pomegranate_1',
+    ${calc_grape})
+yxf:
+  headers:
+    survey:
+    - '#'
+    - type
+    - name
+    - label
+    - label::Wolof (wo)
+    - label::Fula (ff)
+    - label::Mandinka (mnk)
+    - hint
+    - required
+    - relevant
+    - constraint
+    - constraint_message
+    - appearance
+    - calculation
+    choices:
+    - list_name
+    - name
+    - label
+    settings:
+    - form_title
+    - form_id
+    - version
+    - default_language
+    - style
+    - instance_name

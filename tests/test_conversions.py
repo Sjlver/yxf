@@ -37,6 +37,17 @@ def excel_file(request):
     return TESTDATA_DIR / request.param
 
 
+@pytest.fixture(
+    params=[
+        "fruit-nested-groups.yaml",
+        "fruit-html-labels.yaml",
+    ]
+)
+def yaml_file(request):
+    """Fixture providing the YAML forms with a complex group structure."""
+    return TESTDATA_DIR / request.param
+
+
 def test_excel_to_yaml_snapshot(excel_file, snapshot):
     """Test Excel → YAML conversion produces stable output."""
     with open(excel_file, "rb") as f:
@@ -102,3 +113,67 @@ def test_markdown_roundtrip_via_yaml(excel_file):
     # We check that the structure is preserved
     assert "survey" in yaml_after_markdown
     assert "yxf" in yaml_after_markdown
+
+
+def test_yaml_form_roundtrip_stability(yaml_file):
+    """Test YAML → Excel → YAML on forms with a complex group structure.
+
+    These forms nest groups and repeats several levels deep, mix all the
+    spellings of the group markers, and contain "type: end" metadata rows.
+    """
+    yaml1 = yaml_file.read_text(encoding="utf-8")
+
+    excel_bytes = io.BytesIO()
+    write_xlsform(read_yaml(yaml1), excel_bytes)
+    excel_bytes.seek(0)
+    yaml2 = write_yaml(read_xlsform(excel_bytes))
+
+    assert yaml1 == yaml2, "YAML should be identical after round-trip through Excel"
+
+
+def test_yaml_form_group_structure_is_preserved(yaml_file):
+    """Test that the nesting of groups survives a round-trip through Excel."""
+    from yxf.xlsform import nesting_levels
+
+    form1 = read_yaml(yaml_file.read_text(encoding="utf-8"))
+    levels1 = nesting_levels([row.get("type", "") for row in form1["survey"]])
+    assert max(levels1) >= 3, "the fixture should nest at least three levels deep"
+
+    excel_bytes = io.BytesIO()
+    write_xlsform(form1, excel_bytes)
+    excel_bytes.seek(0)
+    form2 = read_xlsform(excel_bytes)
+    levels2 = nesting_levels([row.get("type", "") for row in form2["survey"]])
+
+    assert levels1 == levels2
+
+
+def test_yaml_form_markdown_preserves_structure(yaml_file):
+    """Test that Markdown keeps the question structure of the complex forms.
+
+    Markdown is a lossy format for these forms: it cannot represent multi-line
+    values (yxf warns about that), and a comment column with no comments in it
+    is not restored when reading back. The order, types and names of the
+    questions must survive regardless, since that is what defines the form.
+    """
+    form1 = read_yaml(yaml_file.read_text(encoding="utf-8"))
+    structure = [(row.get("type"), row.get("name")) for row in form1["survey"]]
+
+    markdown = write_markdown(form1, yaml_file.name)
+    form2 = read_markdown(markdown, yaml_file.name)
+
+    assert [(row.get("type"), row.get("name")) for row in form2["survey"]] == structure
+
+
+def test_write_markdown_does_not_modify_the_form(yaml_file):
+    """Test that writing Markdown leaves the caller's form untouched.
+
+    write_markdown used to delete the comment column from the form it was
+    given, so a caller that wrote Markdown and then YAML lost their comments.
+    """
+    form = read_yaml(yaml_file.read_text(encoding="utf-8"))
+    before = write_yaml(read_yaml(yaml_file.read_text(encoding="utf-8")))
+
+    write_markdown(form, yaml_file.name)
+
+    assert write_yaml(form) == before

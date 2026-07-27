@@ -7,6 +7,8 @@ for maximum flexibility.
 
 import strictyaml
 
+from .xlsform import KNOWN_SHEETS
+
 
 def read_yaml(content: str) -> dict:
     """Parse a YAML string into a form dictionary.
@@ -47,9 +49,10 @@ def write_yaml(form: dict) -> str:
         raise ValueError('YAML file must have a "yxf" entry.')
 
     # Since StrictYAML can't store empty lists, we remove empty sheets from the
-    # form. Their headers are still stored in the yxf entry.
-    for sheet_name in ["survey", "choices", "settings"]:
-        if sheet_name in form and not form[sheet_name]:
-            del form[sheet_name]
+    # form. Their headers are still stored in the yxf entry. We work on a copy,
+    # so that callers keep the form they passed in.
+    form = {
+        key: value for (key, value) in form.items() if value or key not in KNOWN_SHEETS
+    }
 
     return strictyaml.as_document(form).as_yaml()

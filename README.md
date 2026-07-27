@@ -52,14 +52,29 @@ explanations that are useful to the readers of the `.xlsx` or `.yaml` files.
 
 ### Pretty spreadsheets
 
-yxf tries hard to make the XLSForm files look pretty. It is possible to use yxf
-just for that purpose, without intending to store forms as YAML files. To do so,
-simply convert a form to YAML and back:
+yxf tries hard to make the XLSForm files look pretty:
+
+- Groups and repeats are highlighted. Each top-level group gets its own color,
+  and groups nested inside it get darker shades of that color. Blank rows
+  separate each group from what surrounds it.
+- HTML markup inside labels and hints is shown in a dimmed, fixed-width font, so
+  that the text a respondent will actually read stands out from the tags.
+- Columns that hold expressions, names, and comments each get their own style,
+  and column widths are set to fit their content.
+
+It is possible to use yxf just for that purpose, without intending to store
+forms as YAML files. To do so, simply convert a form to YAML and back:
 
 ```shell
 python -m yxf form.xlsx
 python -m yxf -o form-pretty.xlsx form.yaml
 ```
+
+### Supported sheets
+
+yxf converts the `survey`, `choices`, `settings`, `entities` and
+`external_choices` sheets. Any other sheet in a workbook, such as the
+documentation sheet in the template from xlsform.org, is ignored.
 
 ## Validating the form
 

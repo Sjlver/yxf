@@ -91,15 +91,18 @@ def write_markdown(form: dict, source_name: str = "<source>") -> str:
 
     Returns:
         Markdown string representation of the form
+
+    The form is not modified; comment removal and escaping happen on copies.
     """
     md = []
     for sheet_name in form["yxf"]["headers"]:
         md.append(f"## {sheet_name}")
         md.append("")
 
-        sheet = form.get(sheet_name, [])
-        headers = form["yxf"]["headers"][sheet_name]
-        header_indices = dict(zip(headers, range(len(headers))))
+        # Copy the sheet and its headers, so that rendering Markdown does not
+        # change the caller's form.
+        sheet = [dict(row) for row in form.get(sheet_name, [])]
+        headers = list(form["yxf"]["headers"][sheet_name])
 
         # Before we render the table, look for comments and render those.
         # We simply put them as paragraphs in the Markdown file.
@@ -110,10 +113,9 @@ def write_markdown(form: dict, source_name: str = "<source>") -> str:
                     md.append("")
                 del row["#"]
 
-        if headers[0] == "#":
+        if headers and headers[0] == "#":
             headers.pop(0)
-            del header_indices["#"]
-            header_indices = {k: v - 1 for (k, v) in header_indices.items()}
+        header_indices = dict(zip(headers, range(len(headers))))
 
         for i, row in enumerate(sheet):
             for k, v in row.items():

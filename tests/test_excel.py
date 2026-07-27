@@ -71,3 +71,66 @@ class TestWriteXlsform:
         assert "survey" in form_read
         assert len(form_read["survey"]) == 1
         assert form_read["survey"][0]["name"] == "q1"
+
+    def test_empty_sheet_does_not_raise(self):
+        """Test that a sheet with headers but no rows can be written and read."""
+        form = {
+            "survey": [{"name": "q1", "type": "text"}],
+            "choices": [],
+            "yxf": {
+                "headers": {
+                    "survey": ["name", "type"],
+                    "choices": ["list_name", "name", "label"],
+                }
+            },
+        }
+
+        excel_bytes = io.BytesIO()
+        write_xlsform(form, excel_bytes)
+        excel_bytes.seek(0)
+
+        form_read = read_xlsform(excel_bytes)
+        assert form_read["choices"] == []
+        assert form_read["yxf"]["headers"]["choices"] == ["list_name", "name", "label"]
+
+
+class TestExtraSheets:
+    """Tests for the sheets beyond survey, choices and settings."""
+
+    @pytest.mark.parametrize("sheet_name", ["entities", "external_choices"])
+    def test_extra_sheet_survives_a_roundtrip(self, sheet_name):
+        """These sheets used to be dropped silently on every conversion."""
+        form = {
+            "survey": [{"type": "text", "name": "q1"}],
+            sheet_name: [{"list_name": "fruits", "label": "Apple"}],
+            "yxf": {
+                "headers": {
+                    "survey": ["type", "name"],
+                    sheet_name: ["list_name", "label"],
+                }
+            },
+        }
+
+        excel_bytes = io.BytesIO()
+        write_xlsform(form, excel_bytes)
+        excel_bytes.seek(0)
+
+        form_read = read_xlsform(excel_bytes)
+        assert form_read[sheet_name] == [{"list_name": "fruits", "label": "Apple"}]
+
+    def test_unknown_sheets_are_ignored(self):
+        """A documentation sheet must not end up in the converted form."""
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+        sheet.title = "survey"
+        sheet.append(["type", "name"])
+        sheet.append(["text", "q1"])
+        notes = wb.create_sheet("Start here")
+        notes.append(["Some documentation that is not part of the form"])
+        excel_bytes = io.BytesIO()
+        wb.save(excel_bytes)
+        excel_bytes.seek(0)
+
+        form_read = read_xlsform(excel_bytes)
+        assert "Start here" not in form_read
+        assert set(form_read) == {"survey", "yxf"}
